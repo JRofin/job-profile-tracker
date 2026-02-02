@@ -4,6 +4,7 @@ import { JobProfileRequest, STATUS_COLORS } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, User, MapPin, AlertTriangle, Sparkles } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
 
 interface RequestCardProps {
   request: JobProfileRequest;
@@ -50,7 +51,7 @@ export function RequestCard({ request, onClick }: RequestCardProps) {
           {request.dueDate && (
             <span className={`flex items-center gap-1 ${isOverdue ? 'text-red-600 font-medium' : ''}`}>
               {isOverdue ? <AlertTriangle className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
-              {new Date(request.dueDate).toLocaleDateString()}
+              {formatDate(request.dueDate)}
             </span>
           )}
         </div>

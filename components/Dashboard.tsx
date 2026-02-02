@@ -86,6 +86,21 @@ const DEMO_REQUESTS: JobProfileRequest[] = [
     assignedTo: 'Maria Garcia',
     requestDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    // Collaborative data
+    gradeRanges: [
+      { id: 'gr-1', country: 'Spain', minGrade: 8, maxGrade: 10, addedBy: 'Ana Martinez', addedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+      { id: 'gr-2', country: 'Germany', minGrade: 9, maxGrade: 11, addedBy: 'Klaus Weber', addedDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
+    ],
+    comments: [
+      { id: 'c-1', author: 'Ana Martinez', authorInitials: 'AM', text: 'I agree with AP1. The company-wide impact is clear but we don\'t have evidence of external industry influence.', createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString() },
+      { id: 'c-2', author: 'Klaus Weber', authorInitials: 'KW', text: 'For Germany, I\'d suggest Grade 9-11 based on comparable roles in our market.', createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
+      { id: 'c-3', author: 'Maria Garcia', authorInitials: 'MG', text: 'Still waiting for UK grade range. @John can you add it?', createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+    ],
+    reviewerVotes: [
+      { id: 'v-1', reviewer: 'Ana Martinez', reviewerInitials: 'AM', suggestedLevel: 'AP1', hasApproved: true, reviewedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), notes: 'Align with manager feedback' },
+      { id: 'v-2', reviewer: 'Klaus Weber', reviewerInitials: 'KW', suggestedLevel: 'AP1', hasApproved: true, reviewedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
+      { id: 'v-3', reviewer: 'Jordi Rofin', reviewerInitials: 'JR', suggestedLevel: 'AP2', hasApproved: true, reviewedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), notes: 'AI suggests AP2, worth considering' },
+    ],
   },
   {
     id: '4',

@@ -1,3 +1,33 @@
+// Collaborative input types
+export interface GradeRange {
+  id: string;
+  country: string;
+  minGrade: number;
+  maxGrade: number;
+  addedBy: string;
+  addedDate: string;
+  notes?: string;
+}
+
+export interface Comment {
+  id: string;
+  author: string;
+  authorInitials: string;
+  text: string;
+  createdAt: string;
+  isEdited?: boolean;
+}
+
+export interface ReviewerVote {
+  id: string;
+  reviewer: string;
+  reviewerInitials: string;
+  suggestedLevel: string;
+  hasApproved: boolean;
+  reviewedAt: string;
+  notes?: string;
+}
+
 // Job Profile Request types
 export interface JobProfileRequest {
   id?: string;
@@ -27,6 +57,10 @@ export interface JobProfileRequest {
   notes?: string;
   justification?: string;
   urgency: 'Normal' | 'Urgent';
+  // Collaborative fields
+  gradeRanges?: GradeRange[];
+  comments?: Comment[];
+  reviewerVotes?: ReviewerVote[];
 }
 
 export type JobProfileStatus = 

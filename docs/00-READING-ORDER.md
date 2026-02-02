@@ -2,6 +2,8 @@
 
 Use this order to understand **what to build** and **in what sequence** to read the docs and code.
 
+> **New to this project?** Start with the [Workflow Overview](04-WORKFLOW-OVERVIEW.md) for a visual, non-technical explanation of how everything works together.
+
 ---
 
 ## What We Are Building (Summary)
@@ -63,6 +65,16 @@ Use this order to understand **what to build** and **in what sequence** to read 
 
 ---
 
+### For Non-Technical Stakeholders
+
+| Order | Document | What you get |
+|-------|----------|--------------|
+| N.1 | **[04-WORKFLOW-OVERVIEW.md](04-WORKFLOW-OVERVIEW.md)** | Visual diagrams explaining the entire process from request to Workday entry. No technical knowledge required. |
+
+**Outcome:** Anyone can understand how the system works and what happens at each step.
+
+---
+
 ## Code Reading Order (to understand the build)
 
 Read in this order to follow data → API → UI:
@@ -91,7 +103,8 @@ Job-Profile-Tracker/
 │   ├── 00-READING-ORDER.md      ← This file (reading order + what to build)
 │   ├── 01-SHAREPOINT_LISTS_SETUP.md   ← Step 2: create lists first
 │   ├── 02-POWER_AUTOMATE_FLOWS.md     ← Step 3: flows after lists
-│   └── 03-COPILOT_AGENT.md            ← Step 4: optional Copilot
+│   ├── 03-COPILOT_AGENT.md            ← Step 4: optional Copilot
+│   └── 04-WORKFLOW-OVERVIEW.md        ← Non-technical workflow diagrams
 ├── app/
 │   ├── layout.tsx
 │   ├── page.tsx                  (dashboard)

@@ -1,8 +1,11 @@
 'use client';
 
-import { JobProfileRequest, STATUS_COLORS } from '@/lib/types';
+import { useState, useCallback } from 'react';
+import { JobProfileRequest, STATUS_COLORS, GradeRange, Comment, ReviewerVote } from '@/lib/types';
+import { formatDate } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { GradeRangesSection, CommentsSection, ReviewerVotesSection } from '@/components/CollaborativePanel';
 import {
   Sparkles,
   TrendingUp,
@@ -19,9 +22,62 @@ import {
 interface JobProfileDetailModalProps {
   request: JobProfileRequest | null;
   onClose: () => void;
+  onUpdateRequest?: (updatedRequest: JobProfileRequest) => void;
 }
 
-export function JobProfileDetailModal({ request, onClose }: JobProfileDetailModalProps) {
+export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: JobProfileDetailModalProps) {
+  // Local state for collaborative data (in production, this would sync with backend)
+  const [localGradeRanges, setLocalGradeRanges] = useState<GradeRange[]>(request?.gradeRanges || []);
+  const [localComments, setLocalComments] = useState<Comment[]>(request?.comments || []);
+  const [localVotes, setLocalVotes] = useState<ReviewerVote[]>(request?.reviewerVotes || []);
+  const [localAgreedLevel, setLocalAgreedLevel] = useState<string | undefined>(request?.agreedMgmtLevel);
+
+  // Reset local state when request changes
+  const resetState = useCallback(() => {
+    setLocalGradeRanges(request?.gradeRanges || []);
+    setLocalComments(request?.comments || []);
+    setLocalVotes(request?.reviewerVotes || []);
+    setLocalAgreedLevel(request?.agreedMgmtLevel);
+  }, [request]);
+
+  // Handlers for collaborative actions
+  const handleAddGradeRange = (gradeRange: Omit<GradeRange, 'id' | 'addedDate'>) => {
+    const newGradeRange: GradeRange = {
+      ...gradeRange,
+      id: `gr-${Date.now()}`,
+      addedDate: new Date().toISOString()
+    };
+    setLocalGradeRanges(prev => [...prev, newGradeRange]);
+    // In production: call API to save
+  };
+
+  const handleAddComment = (text: string) => {
+    const newComment: Comment = {
+      id: `c-${Date.now()}`,
+      author: 'Current User', // In production: get from auth
+      authorInitials: 'CU',
+      text,
+      createdAt: new Date().toISOString()
+    };
+    setLocalComments(prev => [...prev, newComment]);
+    // In production: call API to save
+  };
+
+  const handleAddVote = (vote: Omit<ReviewerVote, 'id' | 'reviewedAt'>) => {
+    const newVote: ReviewerVote = {
+      ...vote,
+      id: `v-${Date.now()}`,
+      reviewedAt: new Date().toISOString()
+    };
+    setLocalVotes(prev => [...prev, newVote]);
+    // In production: call API to save
+  };
+
+  const handleAgreeLevel = (level: string) => {
+    setLocalAgreedLevel(level);
+    // In production: call API to save and update status
+  };
+
   if (!request) return null;
 
   const isOverdue = request.dueDate && new Date(request.dueDate) < new Date() && request.status !== 'Completed';
@@ -166,6 +222,28 @@ export function JobProfileDetailModal({ request, onClose }: JobProfileDetailModa
             </section>
           )}
 
+          {/* Team Review Section */}
+          <ReviewerVotesSection
+            reviewerVotes={localVotes}
+            aiSuggestedLevel={request.aiSuggestedMgmtLevel}
+            agreedLevel={localAgreedLevel}
+            onAddVote={handleAddVote}
+            onAgreeLevel={handleAgreeLevel}
+          />
+
+          {/* Grade Ranges Section */}
+          <GradeRangesSection
+            gradeRanges={localGradeRanges}
+            countriesNeeded={request.countriesNeeded || []}
+            onAddGradeRange={handleAddGradeRange}
+          />
+
+          {/* Discussion Section */}
+          <CommentsSection
+            comments={localComments}
+            onAddComment={handleAddComment}
+          />
+
           {/* Metadata */}
           <section className="grid grid-cols-2 gap-4 text-sm">
             {/* Countries */}
@@ -186,7 +264,7 @@ export function JobProfileDetailModal({ request, onClose }: JobProfileDetailModa
                 <div>
                   <span className="text-muted-foreground">Requested: </span>
                   <span className="font-medium">
-                    {new Date(request.requestDate).toLocaleDateString()}
+                    {formatDate(request.requestDate)}
                   </span>
                 </div>
               </div>
@@ -199,7 +277,7 @@ export function JobProfileDetailModal({ request, onClose }: JobProfileDetailModa
                 <div className={isOverdue ? 'text-red-600' : ''}>
                   <span className={isOverdue ? 'text-red-600' : 'text-muted-foreground'}>Due: </span>
                   <span className="font-medium">
-                    {new Date(request.dueDate).toLocaleDateString()}
+                    {formatDate(request.dueDate)}
                     {isOverdue && ' (Overdue)'}
                   </span>
                 </div>
