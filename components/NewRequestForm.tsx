@@ -104,6 +104,12 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
           : 'Under Review',
         aiSuggestedMgmtLevel: levelingResult?.suggestedLevel,
         aiSuggestedRationale: levelingResult?.rationale,
+        aiCareerStep: levelingResult?.careerStep,
+        aiStage: levelingResult?.stage,
+        aiConfidence: levelingResult?.confidence,
+        aiWhyNotHigher: levelingResult?.whyNotHigher,
+        aiWhyNotLower: levelingResult?.whyNotLower,
+        aiJdImprovements: levelingResult?.jdImprovements,
         aiSuggestedDate: levelingResult ? new Date().toISOString() : undefined,
         requestDate: new Date().toISOString(),
       };

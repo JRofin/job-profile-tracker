@@ -8,6 +8,12 @@ export interface JobProfileRequest {
   aiSuggestedMgmtLevel?: string;
   aiSuggestedRationale?: string;
   aiSuggestedDate?: string;
+  aiCareerStep?: string;
+  aiStage?: number;
+  aiConfidence?: number;
+  aiWhyNotHigher?: string;
+  aiWhyNotLower?: string;
+  aiJdImprovements?: string[];
   agreedMgmtLevel?: string;
   status: JobProfileStatus;
   requestedBy?: string;
@@ -47,6 +53,7 @@ export interface LevelingResponse {
   whyNotHigher?: string;
   whyNotLower?: string;
   confidence?: number;
+  jdImprovements?: string[];
 }
 
 // Form field options

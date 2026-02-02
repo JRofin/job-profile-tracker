@@ -72,6 +72,11 @@ ANALYSIS INSTRUCTIONS:
    - Team management responsibilities (none, one team, multiple teams)
 3. Match characteristics to the appropriate career framework level
 4. Consider that "Manager" in title does NOT automatically mean people leadership
+5. Identify improvements to make the job description clearer and more level-appropriate:
+   - Missing scope/impact clarity
+   - Vague responsibilities that could be more specific
+   - Missing autonomy indicators
+   - Suggestions to better align the JD with the suggested level
 
 RESPOND IN THIS EXACT JSON FORMAT:
 {
@@ -81,7 +86,8 @@ RESPOND IN THIS EXACT JSON FORMAT:
   "rationale": "[2-3 sentences explaining why this level was chosen based on the job profile characteristics]",
   "whyNotHigher": "[1-2 sentences explaining why the next higher level was not selected]",
   "whyNotLower": "[1-2 sentences explaining why the next lower level was not selected]",
-  "confidence": [0.0 to 1.0 confidence score]
+  "confidence": [0.0 to 1.0 confidence score],
+  "jdImprovements": ["actionable suggestion 1", "actionable suggestion 2", "actionable suggestion 3"]
 }`;
 }
 
@@ -147,7 +153,8 @@ export async function getLevelingSuggestion(request: LevelingRequest): Promise<L
       rationale: result.rationale,
       whyNotHigher: result.whyNotHigher,
       whyNotLower: result.whyNotLower,
-      confidence: result.confidence
+      confidence: result.confidence,
+      jdImprovements: result.jdImprovements
     };
   } catch (e) {
     throw new Error(`Failed to parse OpenAI response: ${content}`);

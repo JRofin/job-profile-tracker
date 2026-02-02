@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { RequestCard } from '@/components/RequestCard';
+import { JobProfileDetailModal } from '@/components/JobProfileDetailModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { JobProfileRequest, STATUS_OPTIONS, JobProfileStatus } from '@/lib/types';
@@ -13,11 +14,22 @@ const DEMO_REQUESTS: JobProfileRequest[] = [
   {
     id: '1',
     title: 'Cloud Platform Engineer II',
-    description: 'Responsible for designing and implementing cloud infrastructure solutions. Works independently on complex technical problems.',
+    description: 'Responsible for designing and implementing cloud infrastructure solutions. Works independently on complex technical problems. Participates in architecture reviews and provides technical guidance to team members.',
     department: 'IT',
     proposedMgmtLevel: 'P2',
     aiSuggestedMgmtLevel: 'P2',
-    aiSuggestedRationale: 'Based on the technical complexity and independent work nature of the role.',
+    aiCareerStep: 'Professional',
+    aiStage: 2,
+    aiConfidence: 0.85,
+    aiSuggestedRationale: 'The role requires independent work on moderately complex technical problems with team-level influence. The mention of participating in architecture reviews and providing guidance indicates P2-level autonomy and impact.',
+    aiWhyNotHigher: 'P3 would require leading complex projects or being a recognized SME with cross-functional influence. The description focuses on execution rather than strategic leadership.',
+    aiWhyNotLower: 'P1 would be too low given the independent work requirement and the expectation to provide technical guidance. This role clearly operates beyond entry-level professional responsibilities.',
+    aiJdImprovements: [
+      'Clarify the scope of "complex technical problems" - specify if these are novel or precedented challenges',
+      'Add detail on decision-making authority - what technical decisions can this role make independently?',
+      'Specify the impact scope - is influence limited to immediate team or extends to other functions?',
+      'Consider adding metrics or KPIs to make the role expectations more measurable'
+    ],
     status: 'Under Review',
     countriesNeeded: ['Spain', 'Mexico', 'Romania'],
     urgency: 'Normal',
@@ -30,6 +42,19 @@ const DEMO_REQUESTS: JobProfileRequest[] = [
     description: 'Manages AI data collection and annotation projects. Coordinates with global teams to ensure data quality.',
     department: 'Welo Data',
     proposedMgmtLevel: '',
+    aiSuggestedMgmtLevel: 'P2',
+    aiCareerStep: 'Professional',
+    aiStage: 2,
+    aiConfidence: 0.72,
+    aiSuggestedRationale: 'Managing projects and coordinating across global teams indicates professional-level autonomy. The role appears to have moderate complexity and cross-team coordination responsibilities.',
+    aiWhyNotHigher: 'Without evidence of strategic influence, SME recognition, or people management, P3 or AP1 would be too high.',
+    aiWhyNotLower: 'The project management and global coordination aspects exceed routine execution expected at C3 or P1 levels.',
+    aiJdImprovements: [
+      'Define "manages" more clearly - does this role have budget/resource authority or is it coordination only?',
+      'Specify the scale of projects managed (team size, duration, complexity)',
+      'Clarify decision-making scope for data quality standards',
+      'Add information about stakeholder interactions and influence level'
+    ],
     status: 'Awaiting Mgmt Level',
     countriesNeeded: ['India', 'USA'],
     urgency: 'Urgent',
@@ -39,9 +64,21 @@ const DEMO_REQUESTS: JobProfileRequest[] = [
   {
     id: '3',
     title: 'Senior Language Solutions Architect',
-    description: 'Strategic design authority for language technology solutions. Influences multiple functions with company-wide impact.',
+    description: 'Strategic design authority for language technology solutions. Influences multiple functions with company-wide impact. Drives innovation and sets technical direction for the language technology stack.',
     department: 'TME',
     proposedMgmtLevel: 'AP1',
+    aiSuggestedMgmtLevel: 'AP2',
+    aiCareerStep: 'Advanced Professional',
+    aiStage: 2,
+    aiConfidence: 0.78,
+    aiSuggestedRationale: 'The role is positioned as a strategic design authority with company-wide impact and cross-functional influence. This indicates Advanced Professional level with significant SME responsibilities.',
+    aiWhyNotHigher: 'AP3 would require evidence of industry recognition or influence beyond the organization. The description focuses on internal company impact.',
+    aiWhyNotLower: 'AP1 would undervalue the strategic authority and company-wide impact described. The role clearly influences multiple functions and sets technical direction.',
+    aiJdImprovements: [
+      'Quantify the scope of "company-wide impact" with examples',
+      'Clarify if this role has any people leadership responsibilities (dotted or direct)',
+      'Add detail on the innovation aspects - R&D budget, external partnerships?'
+    ],
     agreedMgmtLevel: 'AP1',
     status: 'Ready for Workday',
     countriesNeeded: ['Spain', 'Germany', 'UK'],
@@ -53,10 +90,21 @@ const DEMO_REQUESTS: JobProfileRequest[] = [
   {
     id: '4',
     title: 'Project Coordinator',
-    description: 'Coordinates project activities and communications. Supports project managers with routine tasks.',
+    description: 'Coordinates project activities and communications. Supports project managers with routine tasks. Maintains project documentation and schedules meetings.',
     department: 'Life Sciences',
     proposedMgmtLevel: 'C3',
     aiSuggestedMgmtLevel: 'C3',
+    aiCareerStep: 'Core',
+    aiStage: 3,
+    aiConfidence: 0.92,
+    aiSuggestedRationale: 'This is a clear Core-level coordination role with routine, well-defined tasks. The support nature and focus on documentation and scheduling are characteristic of C3.',
+    aiWhyNotHigher: 'P1 would require more independent work and decision-making. This role explicitly supports project managers rather than leading work independently.',
+    aiWhyNotLower: 'C2 would be too junior for coordination responsibilities across project activities. C3 is appropriate for experienced coordinators.',
+    aiJdImprovements: [
+      'The JD is appropriately scoped for C3 level',
+      'Consider adding any escalation or problem-solving expectations',
+      'Clarify reporting structure and who this role supports'
+    ],
     agreedMgmtLevel: 'C3',
     status: 'Grades Pending',
     countriesNeeded: ['Spain', 'Mexico'],
@@ -70,6 +118,7 @@ export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<JobProfileStatus | 'all'>('all');
   const [requests] = useState<JobProfileRequest[]>(DEMO_REQUESTS);
+  const [selectedRequest, setSelectedRequest] = useState<JobProfileRequest | null>(null);
 
   const filteredRequests = useMemo(() => {
     return requests.filter(request => {
@@ -172,10 +221,7 @@ export function Dashboard() {
             <RequestCard
               key={request.id}
               request={request}
-              onClick={() => {
-                // In production: navigate to detail page or open modal
-                console.log('Open request:', request.id);
-              }}
+              onClick={() => setSelectedRequest(request)}
             />
           ))}
         </div>
@@ -189,6 +235,12 @@ export function Dashboard() {
           </Link>
         </div>
       )}
+
+      {/* Detail Modal */}
+      <JobProfileDetailModal
+        request={selectedRequest}
+        onClose={() => setSelectedRequest(null)}
+      />
     </div>
   );
 }
