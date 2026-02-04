@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LevelingResult } from '@/components/LevelingResult';
-import { DEPARTMENTS, MANAGEMENT_LEVELS, COUNTRIES, LevelingResponse, JobProfileRequest } from '@/lib/types';
+import { DEPARTMENTS, MANAGEMENT_LEVELS, COUNTRIES, getPeoplePartnerForDepartment, LevelingResponse, JobProfileRequest } from '@/lib/types';
 import { Sparkles, Send, Loader2, AlertCircle } from 'lucide-react';
 
 interface NewRequestFormProps {
@@ -97,11 +97,15 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
     setIsSubmitting(true);
 
     try {
+      const peoplePartner = formData.department ? getPeoplePartnerForDepartment(formData.department) : null;
       const request: Partial<JobProfileRequest> = {
         ...formData,
         status: formData.proposedMgmtLevel === 'I don\'t know / Let the team decide' || !formData.proposedMgmtLevel
           ? 'Awaiting Mgmt Level'
           : 'Under Review',
+        owner: peoplePartner?.lead,
+        ownerCoLead: peoplePartner?.coLead,
+        assignedTo: peoplePartner?.lead ?? undefined,
         aiSuggestedMgmtLevel: levelingResult?.suggestedLevel,
         aiSuggestedRationale: levelingResult?.rationale,
         aiCareerStep: levelingResult?.careerStep,
@@ -132,12 +136,21 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>New Job Profile Request</CardTitle>
-          <CardDescription>
-            Fill in the job details. You can use AI to get a management level suggestion.
-          </CardDescription>
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-welocalize-blue to-cyan-600 flex items-center justify-center shadow-md">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <CardTitle className="text-lg">Job Profile Details</CardTitle>
+              <CardDescription>
+                Required fields marked with *
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Title */}
@@ -179,33 +192,50 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
                 <option key={dept} value={dept}>{dept}</option>
               ))}
             </select>
+            {formData.department && (
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Owner (People Partner):</span>{' '}
+                {getPeoplePartnerForDepartment(formData.department).lead}
+                {' '}
+                <span className="text-muted-foreground">(Co-Lead: {getPeoplePartnerForDepartment(formData.department).coLead})</span>
+                {' '}
+                — They will receive reminders and drive execution.
+              </p>
+            )}
           </div>
 
           {/* AI Suggestion Button */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 p-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100">
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <Sparkles className="h-4 w-4 text-welocalize-blue" />
+              <span className="font-medium">AI-Powered Analysis</span>
+            </div>
+            <p className="text-sm text-slate-500">
+              Get an intelligent suggestion for the management level based on the Career Framework and 4 Pillars.
+            </p>
             <Button
               type="button"
               variant="outline"
               onClick={handleSuggestLevel}
               disabled={isLoadingLeveling || !formData.title || !formData.description}
-              className="w-full border-welocalize-blue text-welocalize-blue hover:bg-welocalize-blue hover:text-white"
+              className="w-full bg-white border-welocalize-blue text-welocalize-blue hover:bg-gradient-to-r hover:from-welocalize-blue hover:to-cyan-600 hover:text-white hover:border-transparent transition-all shadow-sm hover:shadow-md"
             >
               {isLoadingLeveling ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing...
+                  Analyzing with AI...
                 </>
               ) : (
                 <>
                   <Sparkles className="mr-2 h-4 w-4" />
-                  Suggest level with AI
+                  Suggest Level with AI
                 </>
               )}
             </Button>
 
             {levelingError && (
-              <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-md">
-                <AlertCircle className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 {levelingError}
               </div>
             )}
@@ -213,7 +243,13 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
 
           {/* Leveling Result */}
           {levelingResult && (
-            <LevelingResult result={levelingResult} onAccept={handleAcceptLevel} />
+            <LevelingResult 
+              result={levelingResult} 
+              onAccept={handleAcceptLevel}
+              title={formData.title}
+              description={formData.description}
+              department={formData.department}
+            />
           )}
 
           {/* Management Level */}
@@ -302,28 +338,37 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
       </Card>
 
       {/* Submit Button */}
-      <Button
-        type="submit"
-        disabled={isSubmitting || !formData.title || !formData.description}
-        className="w-full bg-welocalize-blue hover:bg-welocalize-blue-dark"
-        size="lg"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Submitting...
-          </>
-        ) : submitSuccess ? (
-          <>
-            ✓ Request Submitted
-          </>
-        ) : (
-          <>
-            <Send className="mr-2 h-4 w-4" />
-            Submit Request
-          </>
-        )}
-      </Button>
+      <div className="sticky bottom-4 pt-4">
+        <Button
+          type="submit"
+          disabled={isSubmitting || !formData.title || !formData.description}
+          className={`w-full shadow-lg hover:shadow-xl transition-all ${
+            submitSuccess 
+              ? 'bg-green-600 hover:bg-green-700' 
+              : 'bg-gradient-to-r from-welocalize-blue to-cyan-600 hover:from-welocalize-blue-dark hover:to-cyan-700'
+          }`}
+          size="lg"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Submitting Request...
+            </>
+          ) : submitSuccess ? (
+            <>
+              <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Request Submitted Successfully!
+            </>
+          ) : (
+            <>
+              <Send className="mr-2 h-5 w-5" />
+              Submit Request
+            </>
+          )}
+        </Button>
+      </div>
     </form>
   );
 }

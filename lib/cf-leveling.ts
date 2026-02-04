@@ -49,7 +49,7 @@ export function buildLevelingPrompt(request: LevelingRequest): string {
     ? `\nTitle Analysis:\n${matchedHeuristics.map(h => `- "${h.keyword}" suggests ${h.implication}: ${h.reasoning}`).join('\n')}`
     : '';
 
-  return `You are an expert HR consultant specializing in Welocalize's Career Framework. Analyze this job profile and suggest the appropriate management level.
+  return `You are an expert HR consultant specializing in Welo Global's Career Framework. Analyze this job profile and suggest the appropriate management level.
 
 CAREER FRAMEWORK HIERARCHY (from lowest to highest):
 ${CAREER_FRAMEWORK.hierarchy.join(' → ')}

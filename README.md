@@ -1,6 +1,6 @@
 # Job Profile Tracker
 
-Unified system to manage Job Profile requests in Workday, with AI-assisted management level assessment based on Welocalize's Career Framework.
+Unified system to manage Job Profile requests in Workday, with AI-assisted management level assessment based on Welo Global's Career Framework.
 
 ---
 
@@ -174,4 +174,4 @@ The API at `/api/leveling` uses the Career Framework logic to analyze job profil
 
 ## License
 
-Internal use at Welocalize.
+Internal use at Welo Global.

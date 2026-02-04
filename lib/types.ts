@@ -48,6 +48,10 @@ export interface JobProfileRequest {
   status: JobProfileStatus;
   requestedBy?: string;
   assignedTo?: string;
+  /** People Partner Lead (owner) – receives reminders and drives execution */
+  owner?: string;
+  /** People Partner Co-Lead – can receive reminders */
+  ownerCoLead?: string;
   requestDate?: string;
   dueDate?: string;
   completedDate?: string;
@@ -90,16 +94,73 @@ export interface LevelingResponse {
   jdImprovements?: string[];
 }
 
+// Improved JD generation types
+export interface ImproveJDRequest {
+  title: string;
+  description: string;
+  department?: string;
+  suggestedLevel: string;
+  jdImprovements?: string[];
+}
+
+export interface ImproveJDResponse {
+  improvedJD: string;
+  changes: string[];
+}
+
+// People Partner structure (Lead = owner, receives reminders)
+export interface PeoplePartner {
+  lead: string;
+  coLead: string;
+}
+
+/** People Partner by area. Owner (Lead) is responsible for execution and receives reminders. */
+export const PEOPLE_PARTNER_BY_AREA: Record<string, PeoplePartner> = {
+  'Welo Global': { lead: 'Fiona Casserly', coLead: 'Noemi Rodriguez' },
+  'Life Sciences': { lead: 'Noemi Rodriguez', coLead: 'Cecilia Luraschi' },
+  'ParkIP': { lead: 'Noemi Rodriguez', coLead: 'Cecilia Luraschi' },
+  'Operations': { lead: 'Marina Liang', coLead: 'Sabrina Zhang' },
+  'Welo Data': { lead: 'Andeen Riley', coLead: 'Farhat Safa' },
+  'Technology': { lead: 'Mansi Goyal', coLead: 'Jordi Rofin' },
+  'Finance': { lead: 'Farhat Safa', coLead: 'Fiona Casserly' },
+  'Marketing': { lead: 'Farhat Safa', coLead: 'Fiona Casserly' },
+};
+
+/** Map department (form value) to People Partner area for owner assignment */
+const DEPARTMENT_TO_PEOPLE_PARTNER_AREA: Record<string, string> = {
+  'Life Sciences': 'Life Sciences',
+  'ParkIP': 'ParkIP',
+  'Legal': 'Welo Global',
+  'TME': 'Technology',
+  'Welo Data': 'Welo Data',
+  'Adapt': 'Welo Global',
+  'People Operations': 'Operations',
+  'Operations': 'Operations',
+  'Finance': 'Finance',
+  'Technology': 'Technology',
+  'Marketing': 'Marketing',
+  'Sales': 'Welo Global',
+  'Other': 'Welo Global',
+};
+
+/** Get owner (Lead) and Co-Lead for a department. Used when creating a Job Profile request. */
+export function getPeoplePartnerForDepartment(department: string): PeoplePartner {
+  const area = DEPARTMENT_TO_PEOPLE_PARTNER_AREA[department] || 'Welo Global';
+  return PEOPLE_PARTNER_BY_AREA[area] || PEOPLE_PARTNER_BY_AREA['Welo Global'];
+}
+
 // Form field options
 export const DEPARTMENTS = [
   'Life Sciences',
+  'ParkIP',
   'Legal',
   'TME',
   'Welo Data',
   'Adapt',
   'People Operations',
+  'Operations',
   'Finance',
-  'IT',
+  'Technology',
   'Marketing',
   'Sales',
   'Other'

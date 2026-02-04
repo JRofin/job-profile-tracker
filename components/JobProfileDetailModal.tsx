@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { JobProfileRequest, STATUS_COLORS, GradeRange, Comment, ReviewerVote } from '@/lib/types';
+import { useState, useCallback, useEffect } from 'react';
+import { JobProfileRequest, STATUS_COLORS, STATUS_OPTIONS, JobProfileStatus, GradeRange, Comment, ReviewerVote } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -14,10 +14,14 @@ import {
   MapPin,
   Calendar,
   User,
+  UserCheck,
   Clock,
   Lightbulb,
-  FileText
+  FileText,
+  Bell,
+  ArrowRightLeft
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface JobProfileDetailModalProps {
   request: JobProfileRequest | null;
@@ -31,14 +35,24 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
   const [localComments, setLocalComments] = useState<Comment[]>(request?.comments || []);
   const [localVotes, setLocalVotes] = useState<ReviewerVote[]>(request?.reviewerVotes || []);
   const [localAgreedLevel, setLocalAgreedLevel] = useState<string | undefined>(request?.agreedMgmtLevel);
+  const [localStatus, setLocalStatus] = useState<JobProfileStatus>(request?.status || 'New');
+  const [localOwner, setLocalOwner] = useState<string | undefined>(request?.owner || request?.assignedTo);
+  const [localCoLead, setLocalCoLead] = useState<string | undefined>(request?.ownerCoLead);
+  const [sendingReminder, setSendingReminder] = useState(false);
+  const [reminderFeedback, setReminderFeedback] = useState<'success' | 'error' | null>(null);
 
-  // Reset local state when request changes
-  const resetState = useCallback(() => {
-    setLocalGradeRanges(request?.gradeRanges || []);
-    setLocalComments(request?.comments || []);
-    setLocalVotes(request?.reviewerVotes || []);
-    setLocalAgreedLevel(request?.agreedMgmtLevel);
-  }, [request]);
+  // Sync local state when request changes (e.g. open different card)
+  useEffect(() => {
+    if (request) {
+      setLocalGradeRanges(request.gradeRanges || []);
+      setLocalComments(request.comments || []);
+      setLocalVotes(request.reviewerVotes || []);
+      setLocalAgreedLevel(request.agreedMgmtLevel);
+      setLocalStatus(request.status || 'New');
+      setLocalOwner(request.owner || request.assignedTo);
+      setLocalCoLead(request.ownerCoLead);
+    }
+  }, [request?.id]);
 
   // Handlers for collaborative actions
   const handleAddGradeRange = (gradeRange: Omit<GradeRange, 'id' | 'addedDate'>) => {
@@ -78,9 +92,65 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
     // In production: call API to save and update status
   };
 
+  const handleStatusChange = (newStatus: JobProfileStatus) => {
+    setLocalStatus(newStatus);
+    if (request && onUpdateRequest) {
+      onUpdateRequest({ ...request, status: newStatus });
+    }
+  };
+
+  const handleSwapOwner = () => {
+    if (!localOwner || !localCoLead) return;
+    const newOwner = localCoLead;
+    const newCoLead = localOwner;
+    setLocalOwner(newOwner);
+    setLocalCoLead(newCoLead);
+    if (request && onUpdateRequest) {
+      onUpdateRequest({
+        ...request,
+        owner: newOwner,
+        ownerCoLead: newCoLead,
+        assignedTo: newOwner,
+      });
+    }
+  };
+
+  const handleSendReminder = async () => {
+    const owner = localOwner;
+    const ownerCoLead = localCoLead;
+    if (!request || (!owner && !ownerCoLead)) return;
+    setSendingReminder(true);
+    setReminderFeedback(null);
+    try {
+      const res = await fetch('/api/reminder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: request.id,
+          title: request.title,
+          owner: owner || undefined,
+          ownerCoLead: ownerCoLead || undefined,
+          status: request.status,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send reminder');
+      setReminderFeedback('success');
+      setTimeout(() => setReminderFeedback(null), 4000);
+    } catch {
+      setReminderFeedback('error');
+      setTimeout(() => setReminderFeedback(null), 4000);
+    } finally {
+      setSendingReminder(false);
+    }
+  };
+
   if (!request) return null;
 
-  const isOverdue = request.dueDate && new Date(request.dueDate) < new Date() && request.status !== 'Completed';
+  // Use local status for display (so dropdown updates immediately)
+  const displayStatus = localStatus;
+
+  const isOverdue = request.dueDate && new Date(request.dueDate) < new Date() && displayStatus !== 'Completed';
   const confidencePercent = request.aiConfidence ? Math.round(request.aiConfidence * 100) : null;
 
   return (
@@ -98,9 +168,18 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
                     {request.department}
                   </span>
                 )}
-                <Badge className={STATUS_COLORS[request.status] || 'bg-gray-100'}>
-                  {request.status}
-                </Badge>
+                <select
+                  value={displayStatus}
+                  onChange={(e) => handleStatusChange(e.target.value as JobProfileStatus)}
+                  className={`h-8 rounded-md border px-2.5 py-1 text-sm font-medium cursor-pointer ${STATUS_COLORS[displayStatus] || 'bg-gray-100 text-gray-800'} border-transparent focus:ring-2 focus:ring-welocalize-blue/50`}
+                  title="Change status"
+                >
+                  {STATUS_OPTIONS.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
                 {request.urgency === 'Urgent' && (
                   <Badge variant="destructive">Urgent</Badge>
                 )}
@@ -284,14 +363,63 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
               </div>
             )}
 
-            {/* Assigned To */}
-            {request.assignedTo && (
-              <div className="col-span-2 flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <span className="text-muted-foreground">Assigned to: </span>
-                  <span className="font-medium">{request.assignedTo}</span>
+            {/* Owner (People Partner) */}
+            {(localOwner || request.assignedTo) && (
+              <div className="col-span-2 space-y-2">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex-1">
+                    <span className="text-muted-foreground">Owner (People Partner): </span>
+                    <span className="font-medium">{localOwner}</span>
+                    <span className="text-muted-foreground text-xs block">Receives reminders and drives execution</span>
+                  </div>
+                  {displayStatus !== 'Completed' && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSendReminder}
+                      disabled={sendingReminder}
+                      className="flex-shrink-0"
+                    >
+                      {sendingReminder ? (
+                        'Sending…'
+                      ) : (
+                        <>
+                          <Bell className="h-4 w-4 mr-1.5" />
+                          Send reminder
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
+                {localCoLead && (
+                  <div className="flex items-center gap-2 pl-6 text-sm">
+                    <span className="text-muted-foreground">Co-Lead: </span>
+                    <span className="font-medium">{localCoLead}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSwapOwner}
+                      className="ml-2 h-7 text-xs text-muted-foreground hover:text-foreground"
+                      title="Switch owner with co-lead"
+                    >
+                      <ArrowRightLeft className="h-3.5 w-3.5 mr-1" />
+                      Make owner
+                    </Button>
+                  </div>
+                )}
+                {reminderFeedback === 'success' && (
+                  <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded">
+                    Reminder sent to {[localOwner, localCoLead].filter(Boolean).join(' and ')}.
+                  </p>
+                )}
+                {reminderFeedback === 'error' && (
+                  <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+                    Could not send reminder. Try again or notify them manually.
+                  </p>
+                )}
               </div>
             )}
 

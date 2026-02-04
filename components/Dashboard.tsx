@@ -6,7 +6,7 @@ import { JobProfileDetailModal } from '@/components/JobProfileDetailModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { JobProfileRequest, STATUS_OPTIONS, JobProfileStatus } from '@/lib/types';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Search, Filter, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 // Demo data - in production this would come from SharePoint
@@ -33,6 +33,8 @@ const DEMO_REQUESTS: JobProfileRequest[] = [
     status: 'Under Review',
     countriesNeeded: ['Spain', 'Mexico', 'Romania'],
     urgency: 'Normal',
+    owner: 'Mansi Goyal',
+    ownerCoLead: 'Jordi Rofin',
     requestDate: new Date().toISOString(),
     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   },
@@ -58,6 +60,8 @@ const DEMO_REQUESTS: JobProfileRequest[] = [
     status: 'Awaiting Mgmt Level',
     countriesNeeded: ['India', 'USA'],
     urgency: 'Urgent',
+    owner: 'Andeen Riley',
+    ownerCoLead: 'Farhat Safa',
     requestDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
   },
@@ -83,6 +87,8 @@ const DEMO_REQUESTS: JobProfileRequest[] = [
     status: 'Ready for Workday',
     countriesNeeded: ['Spain', 'Germany', 'UK'],
     urgency: 'Normal',
+    owner: 'Mansi Goyal',
+    ownerCoLead: 'Jordi Rofin',
     assignedTo: 'Maria Garcia',
     requestDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -124,16 +130,36 @@ const DEMO_REQUESTS: JobProfileRequest[] = [
     status: 'Grades Pending',
     countriesNeeded: ['Spain', 'Mexico'],
     urgency: 'Normal',
+    owner: 'Noemi Rodriguez',
+    ownerCoLead: 'Cecilia Luraschi',
     requestDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ];
 
+// Special filter types for metric cards
+type SpecialFilter = 'urgent' | 'overdue' | 'pending-review' | null;
+
 export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<JobProfileStatus | 'all'>('all');
-  const [requests] = useState<JobProfileRequest[]>(DEMO_REQUESTS);
+  const [specialFilter, setSpecialFilter] = useState<SpecialFilter>(null);
+  const [requests, setRequests] = useState<JobProfileRequest[]>(DEMO_REQUESTS);
   const [selectedRequest, setSelectedRequest] = useState<JobProfileRequest | null>(null);
+
+  const handleUpdateRequest = (updatedRequest: JobProfileRequest) => {
+    setRequests((prev) =>
+      prev.map((r) => (r.id === updatedRequest.id ? updatedRequest : r))
+    );
+    setSelectedRequest((current) =>
+      current?.id === updatedRequest.id ? updatedRequest : current
+    );
+  };
+
+  // Helper functions for special filters
+  const isUrgent = (r: JobProfileRequest) => r.urgency === 'Urgent' && r.status !== 'Completed';
+  const isOverdue = (r: JobProfileRequest) => r.dueDate && new Date(r.dueDate) < new Date() && r.status !== 'Completed';
+  const isPendingReview = (r: JobProfileRequest) => r.status === 'Awaiting Mgmt Level' || r.status === 'Under Review';
 
   const filteredRequests = useMemo(() => {
     return requests.filter(request => {
@@ -144,9 +170,19 @@ export function Dashboard() {
       
       const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
       
-      return matchesSearch && matchesStatus;
+      // Apply special filter if active
+      let matchesSpecialFilter = true;
+      if (specialFilter === 'urgent') {
+        matchesSpecialFilter = isUrgent(request);
+      } else if (specialFilter === 'overdue') {
+        matchesSpecialFilter = isOverdue(request);
+      } else if (specialFilter === 'pending-review') {
+        matchesSpecialFilter = isPendingReview(request);
+      }
+      
+      return matchesSearch && matchesStatus && matchesSpecialFilter;
     });
-  }, [requests, searchQuery, statusFilter]);
+  }, [requests, searchQuery, statusFilter, specialFilter]);
 
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = { all: requests.length };
@@ -156,77 +192,223 @@ export function Dashboard() {
     return counts;
   }, [requests]);
 
+  // Calculate stats for metric cards
+  const urgentCount = requests.filter(isUrgent).length;
+  const overdueCount = requests.filter(isOverdue).length;
+  const pendingReviewCount = requests.filter(isPendingReview).length;
+
+  // Handle metric card click
+  const handleMetricClick = (filter: SpecialFilter) => {
+    if (specialFilter === filter) {
+      // Toggle off if already active
+      setSpecialFilter(null);
+    } else {
+      setSpecialFilter(filter);
+      setStatusFilter('all'); // Reset status filter when using special filter
+    }
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSpecialFilter(null);
+    setStatusFilter('all');
+    setSearchQuery('');
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Job Profile Requests</h1>
-          <p className="text-muted-foreground">
-            {filteredRequests.length} of {requests.length} requests
+          <h1 className="text-3xl font-bold text-slate-900">
+            Job Profile Requests
+          </h1>
+          <p className="text-slate-500 mt-1">
+            Manage and track job profile requests across the organization
           </p>
         </div>
         <Link href="/new">
-          <Button className="bg-welocalize-blue hover:bg-welocalize-blue-dark">
+          <Button className="bg-gradient-to-r from-welocalize-blue to-cyan-600 hover:from-welocalize-blue-dark hover:to-cyan-700 shadow-md hover:shadow-lg transition-all">
             <Plus className="mr-2 h-4 w-4" />
             New Request
           </Button>
         </Link>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by title, description or department..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as JobProfileStatus | 'all')}
-            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+      {/* Metric Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button
+          onClick={clearFilters}
+          className={`bg-white rounded-xl p-4 border shadow-sm hover:shadow-md transition-all text-left ${
+            !specialFilter && statusFilter === 'all' ? 'border-welocalize-blue ring-2 ring-welocalize-blue/20' : 'border-slate-200'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Total Requests</p>
+              <p className="text-2xl font-bold text-slate-900 mt-1">{requests.length}</p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+              <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+          </div>
+        </button>
+        
+        <button
+          onClick={() => handleMetricClick('pending-review')}
+          className={`bg-white rounded-xl p-4 border shadow-sm hover:shadow-md transition-all text-left ${
+            specialFilter === 'pending-review' ? 'border-amber-500 ring-2 ring-amber-200 bg-amber-50' : 'border-slate-200'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Pending Review</p>
+              <p className="text-2xl font-bold text-amber-600 mt-1">{pendingReviewCount}</p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+              <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </button>
+        
+        <button
+          onClick={() => handleMetricClick('urgent')}
+          className={`bg-white rounded-xl p-4 border shadow-sm hover:shadow-md transition-all text-left ${
+            specialFilter === 'urgent' ? 'border-orange-500 ring-2 ring-orange-200 bg-orange-50' : 'border-slate-200'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Urgent</p>
+              <p className="text-2xl font-bold text-orange-600 mt-1">{urgentCount}</p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center">
+              <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+          </div>
+        </button>
+        
+        <button
+          onClick={() => handleMetricClick('overdue')}
+          className={`bg-white rounded-xl p-4 border shadow-sm hover:shadow-md transition-all text-left ${
+            specialFilter === 'overdue' ? 'border-red-500 ring-2 ring-red-200 bg-red-50' : 'border-slate-200'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Overdue</p>
+              <p className="text-2xl font-bold text-red-600 mt-1">{overdueCount}</p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
+              <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Active Filter Indicator */}
+      {specialFilter && (
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-slate-500">Filtering by:</span>
+          <span className={`px-3 py-1 rounded-full font-medium ${
+            specialFilter === 'pending-review' ? 'bg-amber-100 text-amber-700' :
+            specialFilter === 'urgent' ? 'bg-orange-100 text-orange-700' :
+            'bg-red-100 text-red-700'
+          }`}>
+            {specialFilter === 'pending-review' ? 'Pending Review' :
+             specialFilter === 'urgent' ? 'Urgent' : 'Overdue'}
+          </span>
+          <button
+            onClick={clearFilters}
+            className="text-slate-400 hover:text-slate-600 transition-colors"
           >
-            <option value="all">All statuses ({statusCounts.all})</option>
-            {STATUS_OPTIONS.map(status => (
-              <option key={status} value={status}>
-                {status} ({statusCounts[status] || 0})
-              </option>
-            ))}
-          </select>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Filters Section */}
+      <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="Search by title, description or department..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-slate-400" />
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as JobProfileStatus | 'all');
+                setSpecialFilter(null); // Clear special filter when changing status
+              }}
+              className="h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-welocalize-blue focus:ring-offset-2 transition-all"
+            >
+              <option value="all">All statuses ({statusCounts.all})</option>
+              {STATUS_OPTIONS.map(status => (
+                <option key={status} value={status}>
+                  {status} ({statusCounts[status] || 0})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Status Pills */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => {
+              setStatusFilter('all');
+              setSpecialFilter(null);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              statusFilter === 'all' && !specialFilter
+                ? 'bg-gradient-to-r from-welocalize-blue to-cyan-600 text-white shadow-md'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            All ({statusCounts.all})
+          </button>
+          {STATUS_OPTIONS.map(status => (
+            <button
+              key={status}
+              onClick={() => {
+                setStatusFilter(status);
+                setSpecialFilter(null);
+              }}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                statusFilter === status && !specialFilter
+                  ? 'bg-gradient-to-r from-welocalize-blue to-cyan-600 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {status} ({statusCounts[status] || 0})
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Status Pills */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => setStatusFilter('all')}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            statusFilter === 'all'
-              ? 'bg-welocalize-blue text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          All ({statusCounts.all})
-        </button>
-        {STATUS_OPTIONS.map(status => (
-          <button
-            key={status}
-            onClick={() => setStatusFilter(status)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              statusFilter === status
-                ? 'bg-welocalize-blue text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {status} ({statusCounts[status] || 0})
-          </button>
-        ))}
+      {/* Results Count */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-slate-500">
+          Showing <span className="font-medium text-slate-700">{filteredRequests.length}</span> of{' '}
+          <span className="font-medium text-slate-700">{requests.length}</span> requests
+        </p>
       </div>
 
       {/* Request Cards */}
@@ -241,13 +423,12 @@ export function Dashboard() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-muted-foreground">No requests found</p>
-          <Link href="/new">
-            <Button variant="link" className="mt-2 text-welocalize-blue">
-              Create new request
-            </Button>
-          </Link>
+        <div className="text-center py-16 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center">
+            <Search className="w-8 h-8 text-slate-400" />
+          </div>
+          <h3 className="text-lg font-medium text-slate-900 mb-1">No requests found</h3>
+          <p className="text-slate-500">Try adjusting your search or filters</p>
         </div>
       )}
 
@@ -255,6 +436,7 @@ export function Dashboard() {
       <JobProfileDetailModal
         request={selectedRequest}
         onClose={() => setSelectedRequest(null)}
+        onUpdateRequest={handleUpdateRequest}
       />
     </div>
   );
