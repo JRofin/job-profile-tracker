@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { JobProfileRequest, STATUS_COLORS, STATUS_OPTIONS, JobProfileStatus, GradeRange, Comment, ReviewerVote } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody } from '@/components/ui/dialog';
@@ -62,19 +62,17 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
       addedDate: new Date().toISOString()
     };
     setLocalGradeRanges(prev => [...prev, newGradeRange]);
-    // In production: call API to save
   };
 
   const handleAddComment = (text: string) => {
     const newComment: Comment = {
       id: `c-${Date.now()}`,
-      author: 'Current User', // In production: get from auth
+      author: 'Current User',
       authorInitials: 'CU',
       text,
       createdAt: new Date().toISOString()
     };
     setLocalComments(prev => [...prev, newComment]);
-    // In production: call API to save
   };
 
   const handleAddVote = (vote: Omit<ReviewerVote, 'id' | 'reviewedAt'>) => {
@@ -84,12 +82,10 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
       reviewedAt: new Date().toISOString()
     };
     setLocalVotes(prev => [...prev, newVote]);
-    // In production: call API to save
   };
 
   const handleAgreeLevel = (level: string) => {
     setLocalAgreedLevel(level);
-    // In production: call API to save and update status
   };
 
   const handleStatusChange = (newStatus: JobProfileStatus) => {
@@ -147,9 +143,7 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
 
   if (!request) return null;
 
-  // Use local status for display (so dropdown updates immediately)
   const displayStatus = localStatus;
-
   const isOverdue = request.dueDate && new Date(request.dueDate) < new Date() && displayStatus !== 'Completed';
   const confidencePercent = request.aiConfidence ? Math.round(request.aiConfidence * 100) : null;
 
@@ -171,7 +165,7 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
                 <select
                   value={displayStatus}
                   onChange={(e) => handleStatusChange(e.target.value as JobProfileStatus)}
-                  className={`h-8 rounded-md border px-2.5 py-1 text-sm font-medium cursor-pointer ${STATUS_COLORS[displayStatus] || 'bg-gray-100 text-gray-800'} border-transparent focus:ring-2 focus:ring-welocalize-blue/50`}
+                  className={`h-8 rounded-lg border px-2.5 py-1 text-xs font-medium cursor-pointer ${STATUS_COLORS[displayStatus] || 'bg-muted text-muted-foreground'} border-transparent focus:ring-2 focus:ring-primary/50`}
                   title="Change status"
                 >
                   {STATUS_OPTIONS.map((status) => (
@@ -181,7 +175,7 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
                   ))}
                 </select>
                 {request.urgency === 'Urgent' && (
-                  <Badge variant="destructive">Urgent</Badge>
+                  <Badge variant="destructive" className="border-0">Urgent</Badge>
                 )}
               </div>
             </div>
@@ -191,25 +185,25 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
         <DialogBody className="space-y-6">
           {/* Job Description */}
           <section>
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2">
-              <FileText className="h-4 w-4" />
+            <h3 className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+              <FileText className="h-4 w-4 text-primary" />
               Job Description
             </h3>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-secondary p-4 rounded-lg">
               {request.description}
             </p>
           </section>
 
           {/* AI Assessment */}
           {request.aiSuggestedMgmtLevel && (
-            <section className="border-2 border-welocalize-blue rounded-lg bg-gradient-to-br from-cyan-50 to-white overflow-hidden">
-              <div className="px-4 py-3 bg-white/80 border-b flex items-center justify-between">
+            <section className="border border-primary/30 rounded-lg bg-primary/5 overflow-hidden">
+              <div className="px-4 py-3 border-b border-primary/20 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-welocalize-blue" />
-                  <h3 className="font-semibold text-gray-900">AI Assessment</h3>
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h3 className="font-medium text-foreground">AI Assessment</h3>
                 </div>
                 {confidencePercent !== null && (
-                  <Badge variant="secondary" className="bg-welocalize-blue text-white">
+                  <Badge variant="secondary" className="bg-primary text-primary-foreground border-0">
                     {confidencePercent}% confidence
                   </Badge>
                 )}
@@ -217,9 +211,9 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
 
               <div className="p-4 space-y-4">
                 {/* Suggested Level */}
-                <div className="flex items-center gap-4 p-4 bg-white rounded-lg border">
+                <div className="flex items-center gap-4 p-4 bg-card rounded-lg border border-border">
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-welocalize-blue">
+                    <div className="text-4xl font-bold text-primary">
                       {request.aiSuggestedMgmtLevel}
                     </div>
                     {request.aiCareerStep && request.aiStage && (
@@ -232,16 +226,16 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
                     {request.proposedMgmtLevel && request.proposedMgmtLevel !== 'I don\'t know / Let the team decide' && (
                       <div className="text-sm">
                         <span className="text-muted-foreground">Proposed: </span>
-                        <span className="font-medium">{request.proposedMgmtLevel}</span>
+                        <span className="font-medium text-foreground">{request.proposedMgmtLevel}</span>
                         {request.proposedMgmtLevel === request.aiSuggestedMgmtLevel && (
-                          <span className="ml-2 text-green-600 text-xs">Match</span>
+                          <span className="ml-2 text-emerald-400 text-xs">Match</span>
                         )}
                       </div>
                     )}
                     {request.agreedMgmtLevel && (
                       <div className="text-sm mt-1">
                         <span className="text-muted-foreground">Agreed: </span>
-                        <span className="font-medium text-green-700">{request.agreedMgmtLevel}</span>
+                        <span className="font-medium text-emerald-400">{request.agreedMgmtLevel}</span>
                       </div>
                     )}
                   </div>
@@ -249,33 +243,33 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
 
                 {/* Rationale */}
                 {request.aiSuggestedRationale && (
-                  <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg">
-                    <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex items-start gap-2 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <Info className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="font-medium text-blue-900 text-sm">Why this level</div>
-                      <p className="text-sm text-blue-800 mt-1">{request.aiSuggestedRationale}</p>
+                      <div className="font-medium text-blue-400 text-sm">Why this level</div>
+                      <p className="text-sm text-foreground/80 mt-1">{request.aiSuggestedRationale}</p>
                     </div>
                   </div>
                 )}
 
                 {/* Why not higher */}
                 {request.aiWhyNotHigher && (
-                  <div className="flex items-start gap-2 p-3 bg-orange-50 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex items-start gap-2 p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                    <TrendingUp className="h-5 w-5 text-orange-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="font-medium text-orange-900 text-sm">Why not higher</div>
-                      <p className="text-sm text-orange-800 mt-1">{request.aiWhyNotHigher}</p>
+                      <div className="font-medium text-orange-400 text-sm">Why not higher</div>
+                      <p className="text-sm text-foreground/80 mt-1">{request.aiWhyNotHigher}</p>
                     </div>
                   </div>
                 )}
 
                 {/* Why not lower */}
                 {request.aiWhyNotLower && (
-                  <div className="flex items-start gap-2 p-3 bg-green-50 rounded-lg">
-                    <TrendingDown className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex items-start gap-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                    <TrendingDown className="h-5 w-5 text-emerald-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="font-medium text-green-900 text-sm">Why not lower</div>
-                      <p className="text-sm text-green-800 mt-1">{request.aiWhyNotLower}</p>
+                      <div className="font-medium text-emerald-400 text-sm">Why not lower</div>
+                      <p className="text-sm text-foreground/80 mt-1">{request.aiWhyNotLower}</p>
                     </div>
                   </div>
                 )}
@@ -285,15 +279,15 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
 
           {/* JD Improvement Suggestions */}
           {request.aiJdImprovements && request.aiJdImprovements.length > 0 && (
-            <section className="border rounded-lg overflow-hidden">
-              <div className="px-4 py-3 bg-amber-50 border-b flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-amber-600" />
-                <h3 className="font-semibold text-gray-900">JD Improvement Suggestions</h3>
+            <section className="border border-border rounded-lg overflow-hidden">
+              <div className="px-4 py-3 bg-amber-500/10 border-b border-amber-500/20 flex items-center gap-2">
+                <Lightbulb className="h-5 w-5 text-amber-400" />
+                <h3 className="font-medium text-foreground">JD Improvement Suggestions</h3>
               </div>
-              <ul className="divide-y">
+              <ul className="divide-y divide-border">
                 {request.aiJdImprovements.map((improvement, index) => (
-                  <li key={index} className="px-4 py-3 text-sm text-gray-700 flex items-start gap-2">
-                    <span className="text-amber-600 font-medium">{index + 1}.</span>
+                  <li key={index} className="px-4 py-3 text-sm text-foreground/80 flex items-start gap-2">
+                    <span className="text-amber-400 font-medium">{index + 1}.</span>
                     {improvement}
                   </li>
                 ))}
@@ -331,7 +325,7 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
                 <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
                 <div>
                   <span className="text-muted-foreground">Countries: </span>
-                  <span className="font-medium">{request.countriesNeeded.join(', ')}</span>
+                  <span className="font-medium text-foreground">{request.countriesNeeded.join(', ')}</span>
                 </div>
               </div>
             )}
@@ -342,7 +336,7 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <span className="text-muted-foreground">Requested: </span>
-                  <span className="font-medium">
+                  <span className="font-medium text-foreground">
                     {formatDate(request.requestDate)}
                   </span>
                 </div>
@@ -352,9 +346,9 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
             {/* Due Date */}
             {request.dueDate && (
               <div className="flex items-center gap-2">
-                <Clock className={`h-4 w-4 ${isOverdue ? 'text-red-600' : 'text-muted-foreground'}`} />
-                <div className={isOverdue ? 'text-red-600' : ''}>
-                  <span className={isOverdue ? 'text-red-600' : 'text-muted-foreground'}>Due: </span>
+                <Clock className={`h-4 w-4 ${isOverdue ? 'text-red-400' : 'text-muted-foreground'}`} />
+                <div className={isOverdue ? 'text-red-400' : ''}>
+                  <span className={isOverdue ? 'text-red-400' : 'text-muted-foreground'}>Due: </span>
                   <span className="font-medium">
                     {formatDate(request.dueDate)}
                     {isOverdue && ' (Overdue)'}
@@ -370,7 +364,7 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
                   <UserCheck className="h-4 w-4 text-muted-foreground" />
                   <div className="flex-1">
                     <span className="text-muted-foreground">Owner (People Partner): </span>
-                    <span className="font-medium">{localOwner}</span>
+                    <span className="font-medium text-foreground">{localOwner}</span>
                     <span className="text-muted-foreground text-xs block">Receives reminders and drives execution</span>
                   </div>
                   {displayStatus !== 'Completed' && (
@@ -383,7 +377,7 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
                       className="flex-shrink-0"
                     >
                       {sendingReminder ? (
-                        'Sending…'
+                        'Sending...'
                       ) : (
                         <>
                           <Bell className="h-4 w-4 mr-1.5" />
@@ -396,7 +390,7 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
                 {localCoLead && (
                   <div className="flex items-center gap-2 pl-6 text-sm">
                     <span className="text-muted-foreground">Co-Lead: </span>
-                    <span className="font-medium">{localCoLead}</span>
+                    <span className="font-medium text-foreground">{localCoLead}</span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -411,12 +405,12 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
                   </div>
                 )}
                 {reminderFeedback === 'success' && (
-                  <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded">
+                  <p className="text-sm text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-lg border border-emerald-500/20">
                     Reminder sent to {[localOwner, localCoLead].filter(Boolean).join(' and ')}.
                   </p>
                 )}
                 {reminderFeedback === 'error' && (
-                  <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+                  <p className="text-sm text-red-400 bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20">
                     Could not send reminder. Try again or notify them manually.
                   </p>
                 )}
@@ -427,7 +421,7 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
             {request.justification && (
               <div className="col-span-2">
                 <div className="text-muted-foreground mb-1">Justification:</div>
-                <p className="text-gray-700 bg-gray-50 p-3 rounded">{request.justification}</p>
+                <p className="text-foreground/80 bg-secondary p-3 rounded-lg">{request.justification}</p>
               </div>
             )}
 
@@ -435,7 +429,7 @@ export function JobProfileDetailModal({ request, onClose, onUpdateRequest }: Job
             {request.notes && (
               <div className="col-span-2">
                 <div className="text-muted-foreground mb-1">Notes:</div>
-                <p className="text-gray-700 bg-gray-50 p-3 rounded">{request.notes}</p>
+                <p className="text-foreground/80 bg-secondary p-3 rounded-lg">{request.notes}</p>
               </div>
             )}
           </section>

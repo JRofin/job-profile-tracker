@@ -10,6 +10,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -44,11 +47,6 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        welocalize: {
-          blue: "#0097a7",
-          "blue-dark": "#007785",
-          "blue-light": "#e0f7fa",
-        }
       },
       borderRadius: {
         lg: "var(--radius)",

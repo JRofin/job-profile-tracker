@@ -6,7 +6,7 @@ import { JobProfileDetailModal } from '@/components/JobProfileDetailModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { JobProfileRequest, STATUS_OPTIONS, JobProfileStatus } from '@/lib/types';
-import { Search, Filter, Plus } from 'lucide-react';
+import { Search, Filter, Plus, FileText, Clock, AlertTriangle, AlertCircle, X } from 'lucide-react';
 import Link from 'next/link';
 
 // Demo data - in production this would come from SharePoint
@@ -216,19 +216,19 @@ export function Dashboard() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
             Job Profile Requests
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             Manage and track job profile requests across the organization
           </p>
         </div>
         <Link href="/new">
-          <Button className="bg-gradient-to-r from-welocalize-blue to-cyan-600 hover:from-welocalize-blue-dark hover:to-cyan-700 shadow-md hover:shadow-lg transition-all">
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors">
             <Plus className="mr-2 h-4 w-4" />
             New Request
           </Button>
@@ -236,79 +236,83 @@ export function Dashboard() {
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <button
           onClick={clearFilters}
-          className={`bg-white rounded-xl p-4 border shadow-sm hover:shadow-md transition-all text-left ${
-            !specialFilter && statusFilter === 'all' ? 'border-welocalize-blue ring-2 ring-welocalize-blue/20' : 'border-slate-200'
+          className={`stat-card text-left group ${
+            !specialFilter && statusFilter === 'all' ? 'border-primary ring-1 ring-primary/20' : ''
           }`}
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Total Requests</p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">{requests.length}</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Requests</p>
+              <p className="text-3xl font-semibold text-foreground mt-2">{requests.length}</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+              <FileText className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
           </div>
         </button>
         
         <button
           onClick={() => handleMetricClick('pending-review')}
-          className={`bg-white rounded-xl p-4 border shadow-sm hover:shadow-md transition-all text-left ${
-            specialFilter === 'pending-review' ? 'border-amber-500 ring-2 ring-amber-200 bg-amber-50' : 'border-slate-200'
+          className={`stat-card text-left group ${
+            specialFilter === 'pending-review' ? 'border-amber-500/50 ring-1 ring-amber-500/20 bg-amber-500/5' : ''
           }`}
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Pending Review</p>
-              <p className="text-2xl font-bold text-amber-600 mt-1">{pendingReviewCount}</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Pending Review</p>
+              <p className="text-3xl font-semibold text-amber-400 mt-2">{pendingReviewCount}</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-              <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+              specialFilter === 'pending-review' ? 'bg-amber-500/20' : 'bg-secondary group-hover:bg-amber-500/10'
+            }`}>
+              <Clock className={`w-5 h-5 transition-colors ${
+                specialFilter === 'pending-review' ? 'text-amber-400' : 'text-muted-foreground group-hover:text-amber-400'
+              }`} />
             </div>
           </div>
         </button>
         
         <button
           onClick={() => handleMetricClick('urgent')}
-          className={`bg-white rounded-xl p-4 border shadow-sm hover:shadow-md transition-all text-left ${
-            specialFilter === 'urgent' ? 'border-orange-500 ring-2 ring-orange-200 bg-orange-50' : 'border-slate-200'
+          className={`stat-card text-left group ${
+            specialFilter === 'urgent' ? 'border-orange-500/50 ring-1 ring-orange-500/20 bg-orange-500/5' : ''
           }`}
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Urgent</p>
-              <p className="text-2xl font-bold text-orange-600 mt-1">{urgentCount}</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Urgent</p>
+              <p className="text-3xl font-semibold text-orange-400 mt-2">{urgentCount}</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center">
-              <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+              specialFilter === 'urgent' ? 'bg-orange-500/20' : 'bg-secondary group-hover:bg-orange-500/10'
+            }`}>
+              <AlertTriangle className={`w-5 h-5 transition-colors ${
+                specialFilter === 'urgent' ? 'text-orange-400' : 'text-muted-foreground group-hover:text-orange-400'
+              }`} />
             </div>
           </div>
         </button>
         
         <button
           onClick={() => handleMetricClick('overdue')}
-          className={`bg-white rounded-xl p-4 border shadow-sm hover:shadow-md transition-all text-left ${
-            specialFilter === 'overdue' ? 'border-red-500 ring-2 ring-red-200 bg-red-50' : 'border-slate-200'
+          className={`stat-card text-left group ${
+            specialFilter === 'overdue' ? 'border-red-500/50 ring-1 ring-red-500/20 bg-red-500/5' : ''
           }`}
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Overdue</p>
-              <p className="text-2xl font-bold text-red-600 mt-1">{overdueCount}</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Overdue</p>
+              <p className="text-3xl font-semibold text-red-400 mt-2">{overdueCount}</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
-              <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+              specialFilter === 'overdue' ? 'bg-red-500/20' : 'bg-secondary group-hover:bg-red-500/10'
+            }`}>
+              <AlertCircle className={`w-5 h-5 transition-colors ${
+                specialFilter === 'overdue' ? 'text-red-400' : 'text-muted-foreground group-hover:text-red-400'
+              }`} />
             </div>
           </div>
         </button>
@@ -317,47 +321,45 @@ export function Dashboard() {
       {/* Active Filter Indicator */}
       {specialFilter && (
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-slate-500">Filtering by:</span>
-          <span className={`px-3 py-1 rounded-full font-medium ${
-            specialFilter === 'pending-review' ? 'bg-amber-100 text-amber-700' :
-            specialFilter === 'urgent' ? 'bg-orange-100 text-orange-700' :
-            'bg-red-100 text-red-700'
+          <span className="text-muted-foreground">Filtering by:</span>
+          <span className={`px-3 py-1 rounded-full font-medium text-xs ${
+            specialFilter === 'pending-review' ? 'bg-amber-500/20 text-amber-400' :
+            specialFilter === 'urgent' ? 'bg-orange-500/20 text-orange-400' :
+            'bg-red-500/20 text-red-400'
           }`}>
             {specialFilter === 'pending-review' ? 'Pending Review' :
              specialFilter === 'urgent' ? 'Urgent' : 'Overdue'}
           </span>
           <button
             onClick={clearFilters}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-secondary rounded"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Filters Section */}
-      <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm space-y-4">
+      <div className="bg-card rounded-xl p-4 border border-border space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by title, description or department..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+              className="pl-10 bg-secondary/50 border-border focus:bg-secondary focus:border-primary/50 transition-colors"
             />
           </div>
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-slate-400" />
+            <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value as JobProfileStatus | 'all');
-                setSpecialFilter(null); // Clear special filter when changing status
+                setSpecialFilter(null);
               }}
-              className="h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-welocalize-blue focus:ring-offset-2 transition-all"
+              className="h-10 rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground focus:bg-secondary focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-all"
             >
               <option value="all">All statuses ({statusCounts.all})</option>
               {STATUS_OPTIONS.map(status => (
@@ -378,8 +380,8 @@ export function Dashboard() {
             }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               statusFilter === 'all' && !specialFilter
-                ? 'bg-gradient-to-r from-welocalize-blue to-cyan-600 text-white shadow-md'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80'
             }`}
           >
             All ({statusCounts.all})
@@ -393,8 +395,8 @@ export function Dashboard() {
               }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 statusFilter === status && !specialFilter
-                  ? 'bg-gradient-to-r from-welocalize-blue to-cyan-600 text-white shadow-md'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80'
               }`}
             >
               {status} ({statusCounts[status] || 0})
@@ -405,15 +407,15 @@ export function Dashboard() {
 
       {/* Results Count */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-500">
-          Showing <span className="font-medium text-slate-700">{filteredRequests.length}</span> of{' '}
-          <span className="font-medium text-slate-700">{requests.length}</span> requests
+        <p className="text-sm text-muted-foreground">
+          Showing <span className="font-medium text-foreground">{filteredRequests.length}</span> of{' '}
+          <span className="font-medium text-foreground">{requests.length}</span> requests
         </p>
       </div>
 
       {/* Request Cards */}
       {filteredRequests.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredRequests.map(request => (
             <RequestCard
               key={request.id}
@@ -423,12 +425,12 @@ export function Dashboard() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 bg-white rounded-xl border border-slate-200 shadow-sm">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center">
-            <Search className="w-8 h-8 text-slate-400" />
+        <div className="text-center py-16 bg-card rounded-xl border border-border">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
+            <Search className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-medium text-slate-900 mb-1">No requests found</h3>
-          <p className="text-slate-500">Try adjusting your search or filters</p>
+          <h3 className="text-lg font-medium text-foreground mb-1">No requests found</h3>
+          <p className="text-muted-foreground">Try adjusting your search or filters</p>
         </div>
       )}
 

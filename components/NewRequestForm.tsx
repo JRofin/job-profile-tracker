@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LevelingResult } from '@/components/LevelingResult';
 import { DEPARTMENTS, MANAGEMENT_LEVELS, COUNTRIES, getPeoplePartnerForDepartment, LevelingResponse, JobProfileRequest } from '@/lib/types';
-import { Sparkles, Send, Loader2, AlertCircle } from 'lucide-react';
+import { Sparkles, Send, Loader2, AlertCircle, FileText } from 'lucide-react';
 
 interface NewRequestFormProps {
   onSubmit?: (request: Partial<JobProfileRequest>) => Promise<void>;
@@ -136,56 +136,56 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <Card className="border-slate-200 shadow-sm">
-        <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+      <Card className="bg-card border-border">
+        <CardHeader className="border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-welocalize-blue to-cyan-600 flex items-center justify-center shadow-md">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+              <FileText className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <CardTitle className="text-lg">Job Profile Details</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-base font-medium text-foreground">Job Profile Details</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Required fields marked with *
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pt-6">
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title">Job Title *</Label>
+            <Label htmlFor="title" className="text-foreground">Job Title *</Label>
             <Input
               id="title"
               placeholder="e.g. Cloud Platform Engineer II"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
+              className="bg-secondary/50 border-border focus:bg-secondary focus:border-primary/50"
               required
             />
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description">Job Description *</Label>
+            <Label htmlFor="description" className="text-foreground">Job Description *</Label>
             <Textarea
               id="description"
               placeholder="Describe main responsibilities, requirements, autonomy level, team management..."
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               rows={6}
+              className="bg-secondary/50 border-border focus:bg-secondary focus:border-primary/50"
               required
             />
           </div>
 
           {/* Department */}
           <div className="space-y-2">
-            <Label htmlFor="department">Department</Label>
+            <Label htmlFor="department" className="text-foreground">Department</Label>
             <select
               id="department"
               value={formData.department}
               onChange={(e) => handleInputChange('department', e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex h-10 w-full rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground focus:bg-secondary focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-colors"
             >
               <option value="">Select a department</option>
               {DEPARTMENTS.map(dept => (
@@ -205,12 +205,12 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
           </div>
 
           {/* AI Suggestion Button */}
-          <div className="flex flex-col gap-4 p-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100">
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Sparkles className="h-4 w-4 text-welocalize-blue" />
+          <div className="flex flex-col gap-4 p-4 bg-primary/5 rounded-xl border border-primary/20">
+            <div className="flex items-center gap-2 text-sm text-foreground">
+              <Sparkles className="h-4 w-4 text-primary" />
               <span className="font-medium">AI-Powered Analysis</span>
             </div>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               Get an intelligent suggestion for the management level based on the Career Framework and 4 Pillars.
             </p>
             <Button
@@ -218,7 +218,7 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
               variant="outline"
               onClick={handleSuggestLevel}
               disabled={isLoadingLeveling || !formData.title || !formData.description}
-              className="w-full bg-white border-welocalize-blue text-welocalize-blue hover:bg-gradient-to-r hover:from-welocalize-blue hover:to-cyan-600 hover:text-white hover:border-transparent transition-all shadow-sm hover:shadow-md"
+              className="w-full bg-card border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
             >
               {isLoadingLeveling ? (
                 <>
@@ -234,7 +234,7 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
             </Button>
 
             {levelingError && (
-              <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+              <div className="flex items-center gap-2 text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 {levelingError}
               </div>
@@ -254,17 +254,17 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
 
           {/* Management Level */}
           <div className="space-y-2">
-            <Label htmlFor="proposedMgmtLevel">
+            <Label htmlFor="proposedMgmtLevel" className="text-foreground">
               Proposed Level
               {levelingResult && formData.proposedMgmtLevel === levelingResult.suggestedLevel && (
-                <span className="ml-2 text-xs text-welocalize-blue">(AI suggestion accepted)</span>
+                <span className="ml-2 text-xs text-primary">(AI suggestion accepted)</span>
               )}
             </Label>
             <select
               id="proposedMgmtLevel"
               value={formData.proposedMgmtLevel}
               onChange={(e) => handleInputChange('proposedMgmtLevel', e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex h-10 w-full rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground focus:bg-secondary focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-colors"
             >
               <option value="">Select a level</option>
               {MANAGEMENT_LEVELS.map(level => (
@@ -275,17 +275,17 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
 
           {/* Countries */}
           <div className="space-y-2">
-            <Label>Countries Requiring Grade Ranges</Label>
+            <Label className="text-foreground">Countries Requiring Grade Ranges</Label>
             <div className="flex flex-wrap gap-2">
               {COUNTRIES.map(country => (
                 <button
                   key={country}
                   type="button"
                   onClick={() => handleCountryToggle(country)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     formData.countriesNeeded.includes(country)
-                      ? 'bg-welocalize-blue text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80'
                   }`}
                 >
                   {country}
@@ -296,27 +296,27 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
 
           {/* Urgency */}
           <div className="space-y-2">
-            <Label>Urgency</Label>
+            <Label className="text-foreground">Urgency</Label>
             <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer text-foreground">
                 <input
                   type="radio"
                   name="urgency"
                   value="Normal"
                   checked={formData.urgency === 'Normal'}
                   onChange={(e) => handleInputChange('urgency', e.target.value)}
-                  className="text-welocalize-blue"
+                  className="accent-primary"
                 />
                 Normal
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer text-foreground">
                 <input
                   type="radio"
                   name="urgency"
                   value="Urgent"
                   checked={formData.urgency === 'Urgent'}
                   onChange={(e) => handleInputChange('urgency', e.target.value)}
-                  className="text-welocalize-blue"
+                  className="accent-primary"
                 />
                 Urgent
               </label>
@@ -325,13 +325,14 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
 
           {/* Justification */}
           <div className="space-y-2">
-            <Label htmlFor="justification">Justification (optional)</Label>
+            <Label htmlFor="justification" className="text-foreground">Justification (optional)</Label>
             <Textarea
               id="justification"
               placeholder="Why is this Job Profile needed?"
               value={formData.justification}
               onChange={(e) => handleInputChange('justification', e.target.value)}
               rows={3}
+              className="bg-secondary/50 border-border focus:bg-secondary focus:border-primary/50"
             />
           </div>
         </CardContent>
@@ -342,10 +343,10 @@ export function NewRequestForm({ onSubmit }: NewRequestFormProps) {
         <Button
           type="submit"
           disabled={isSubmitting || !formData.title || !formData.description}
-          className={`w-full shadow-lg hover:shadow-xl transition-all ${
+          className={`w-full transition-all ${
             submitSuccess 
-              ? 'bg-green-600 hover:bg-green-700' 
-              : 'bg-gradient-to-r from-welocalize-blue to-cyan-600 hover:from-welocalize-blue-dark hover:to-cyan-700'
+              ? 'bg-emerald-600 hover:bg-emerald-700' 
+              : 'bg-primary hover:bg-primary/90'
           }`}
           size="lg"
         >
