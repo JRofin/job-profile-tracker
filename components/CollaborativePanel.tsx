@@ -43,7 +43,7 @@ export function GradeRangesSection({ gradeRanges, countriesNeeded, onAddGradeRan
       country,
       minGrade: parseInt(minGrade),
       maxGrade: parseInt(maxGrade),
-      addedBy: 'Current User', // In production: get from auth
+      addedBy: 'Current User',
       notes: notes || undefined
     });
     setIsAdding(false);
@@ -54,15 +54,15 @@ export function GradeRangesSection({ gradeRanges, countriesNeeded, onAddGradeRan
   };
 
   return (
-    <section className="border rounded-lg overflow-hidden">
-      <div className="px-4 py-3 bg-emerald-50 border-b flex items-center justify-between">
+    <section className="border border-border rounded-lg overflow-hidden">
+      <div className="px-4 py-3 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Globe className="h-5 w-5 text-emerald-600" />
-          <h3 className="font-semibold text-gray-900">Grade Ranges by Country</h3>
+          <Globe className="h-5 w-5 text-emerald-400" />
+          <h3 className="font-medium text-foreground">Grade Ranges by Country</h3>
         </div>
         <div className="flex items-center gap-2">
           {pendingCountries.length > 0 && (
-            <Badge variant="outline" className="text-orange-600 border-orange-300">
+            <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-0">
               {pendingCountries.length} pending
             </Badge>
           )}
@@ -74,7 +74,7 @@ export function GradeRangesSection({ gradeRanges, countriesNeeded, onAddGradeRan
         </div>
       </div>
 
-      <div className="divide-y">
+      <div className="divide-y divide-border">
         {gradeRanges.length === 0 && !isAdding && (
           <div className="px-4 py-6 text-center text-muted-foreground text-sm">
             No grade ranges added yet. Countries needed: {countriesNeeded.join(', ')}
@@ -84,8 +84,8 @@ export function GradeRangesSection({ gradeRanges, countriesNeeded, onAddGradeRan
         {gradeRanges.map((gr) => (
           <div key={gr.id} className="px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="font-medium">{gr.country}</span>
-              <Badge variant="secondary">Grade {gr.minGrade} - {gr.maxGrade}</Badge>
+              <span className="font-medium text-foreground">{gr.country}</span>
+              <Badge variant="secondary" className="border-0">Grade {gr.minGrade} - {gr.maxGrade}</Badge>
             </div>
             <div className="text-sm text-muted-foreground">
               {gr.addedBy} · {formatDate(gr.addedDate)}
@@ -94,12 +94,12 @@ export function GradeRangesSection({ gradeRanges, countriesNeeded, onAddGradeRan
         ))}
 
         {isAdding && (
-          <div className="px-4 py-3 bg-gray-50 space-y-3">
+          <div className="px-4 py-3 bg-secondary/30 space-y-3">
             <div className="grid grid-cols-3 gap-3">
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                className="h-9 rounded-lg border border-border bg-secondary/50 px-3 py-1 text-sm text-foreground focus:bg-secondary focus:ring-2 focus:ring-primary"
               >
                 <option value="">Select country...</option>
                 {COUNTRIES.filter(c => countriesNeeded.includes(c)).map(c => (
@@ -113,21 +113,21 @@ export function GradeRangesSection({ gradeRanges, countriesNeeded, onAddGradeRan
                 placeholder="Min grade"
                 value={minGrade}
                 onChange={(e) => setMinGrade(e.target.value)}
-                className="h-9"
+                className="h-9 bg-secondary/50 border-border"
               />
               <Input
                 type="number"
                 placeholder="Max grade"
                 value={maxGrade}
                 onChange={(e) => setMaxGrade(e.target.value)}
-                className="h-9"
+                className="h-9 bg-secondary/50 border-border"
               />
             </div>
             <Input
               placeholder="Notes (optional)"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="h-9"
+              className="h-9 bg-secondary/50 border-border"
             />
             <div className="flex gap-2 justify-end">
               <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>
@@ -163,13 +163,13 @@ export function CommentsSection({ comments, onAddComment }: CommentsSectionProps
   };
 
   return (
-    <section className="border rounded-lg overflow-hidden">
-      <div className="px-4 py-3 bg-blue-50 border-b flex items-center justify-between">
+    <section className="border border-border rounded-lg overflow-hidden">
+      <div className="px-4 py-3 bg-blue-500/10 border-b border-blue-500/20 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">Discussion</h3>
+          <MessageSquare className="h-5 w-5 text-blue-400" />
+          <h3 className="font-medium text-foreground">Discussion</h3>
           {comments.length > 0 && (
-            <Badge variant="secondary">{comments.length}</Badge>
+            <Badge variant="secondary" className="border-0">{comments.length}</Badge>
           )}
         </div>
       </div>
@@ -184,7 +184,7 @@ export function CommentsSection({ comments, onAddComment }: CommentsSectionProps
         {comments.length > 3 && !isExpanded && (
           <button
             onClick={() => setIsExpanded(true)}
-            className="w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center justify-center gap-1"
+            className="w-full px-4 py-2 text-sm text-blue-400 hover:bg-blue-500/10 flex items-center justify-center gap-1"
           >
             <ChevronUp className="h-4 w-4" />
             Show {comments.length - 3} earlier comments
@@ -192,17 +192,17 @@ export function CommentsSection({ comments, onAddComment }: CommentsSectionProps
         )}
 
         {displayedComments.map((comment) => (
-          <div key={comment.id} className="px-4 py-3 border-b last:border-b-0">
+          <div key={comment.id} className="px-4 py-3 border-b border-border last:border-b-0">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-welocalize-blue text-white flex items-center justify-center text-sm font-medium flex-shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium flex-shrink-0">
                 {comment.authorInitials}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">{comment.author}</span>
+                  <span className="font-medium text-sm text-foreground">{comment.author}</span>
                   <span className="text-xs text-muted-foreground">{formatDate(comment.createdAt)}</span>
                 </div>
-                <p className="text-sm text-gray-700 mt-1">{comment.text}</p>
+                <p className="text-sm text-foreground/80 mt-1">{comment.text}</p>
               </div>
             </div>
           </div>
@@ -211,7 +211,7 @@ export function CommentsSection({ comments, onAddComment }: CommentsSectionProps
         {isExpanded && comments.length > 3 && (
           <button
             onClick={() => setIsExpanded(false)}
-            className="w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center justify-center gap-1"
+            className="w-full px-4 py-2 text-sm text-blue-400 hover:bg-blue-500/10 flex items-center justify-center gap-1"
           >
             <ChevronDown className="h-4 w-4" />
             Show less
@@ -219,13 +219,13 @@ export function CommentsSection({ comments, onAddComment }: CommentsSectionProps
         )}
       </div>
 
-      <div className="px-4 py-3 bg-gray-50 border-t">
+      <div className="px-4 py-3 bg-secondary/30 border-t border-border">
         <div className="flex gap-2">
           <Textarea
             placeholder="Add a comment..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            className="min-h-[60px] resize-none"
+            className="min-h-[60px] resize-none bg-secondary/50 border-border"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -277,7 +277,7 @@ export function ReviewerVotesSection({
   const handleSubmitVote = () => {
     if (!selectedLevel) return;
     onAddVote({
-      reviewer: 'Current User', // In production: get from auth
+      reviewer: 'Current User',
       reviewerInitials: 'CU',
       suggestedLevel: selectedLevel,
       hasApproved: true,
@@ -291,13 +291,13 @@ export function ReviewerVotesSection({
   const levelOptions = MANAGEMENT_LEVELS.filter(l => !l.includes("don't know"));
 
   return (
-    <section className="border rounded-lg overflow-hidden">
-      <div className="px-4 py-3 bg-purple-50 border-b flex items-center justify-between">
+    <section className="border border-border rounded-lg overflow-hidden">
+      <div className="px-4 py-3 bg-purple-500/10 border-b border-purple-500/20 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-purple-600" />
-          <h3 className="font-semibold text-gray-900">Team Review</h3>
+          <Users className="h-5 w-5 text-purple-400" />
+          <h3 className="font-medium text-foreground">Team Review</h3>
           {reviewerVotes.length > 0 && (
-            <Badge variant="secondary">{reviewerVotes.length} votes</Badge>
+            <Badge variant="secondary" className="border-0">{reviewerVotes.length} votes</Badge>
           )}
         </div>
         {!isVoting && !agreedLevel && (
@@ -309,9 +309,9 @@ export function ReviewerVotesSection({
 
       {/* Agreed Level Banner */}
       {agreedLevel && (
-        <div className="px-4 py-3 bg-green-100 border-b flex items-center gap-2">
-          <Check className="h-5 w-5 text-green-700" />
-          <span className="font-medium text-green-800">
+        <div className="px-4 py-3 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center gap-2">
+          <Check className="h-5 w-5 text-emerald-400" />
+          <span className="font-medium text-emerald-400">
             Agreed Level: <span className="text-lg">{agreedLevel}</span>
           </span>
         </div>
@@ -319,7 +319,7 @@ export function ReviewerVotesSection({
 
       {/* Vote Summary */}
       {reviewerVotes.length > 0 && !agreedLevel && (
-        <div className="px-4 py-3 bg-gray-50 border-b">
+        <div className="px-4 py-3 bg-secondary/30 border-b border-border">
           <div className="flex flex-wrap gap-2">
             {Object.entries(voteCounts)
               .sort((a, b) => b[1] - a[1])
@@ -327,14 +327,13 @@ export function ReviewerVotesSection({
                 <button
                   key={level}
                   onClick={() => onAgreeLevel(level)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     level === topVotedLevel?.[0]
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-secondary text-foreground hover:bg-secondary/80'
                   }`}
                 >
                   {level}: {count} vote{count > 1 ? 's' : ''}
-                  {level === topVotedLevel?.[0] && ' ✓'}
                 </button>
               ))}
           </div>
@@ -345,7 +344,7 @@ export function ReviewerVotesSection({
       )}
 
       {/* Individual Votes */}
-      <div className="divide-y max-h-48 overflow-y-auto">
+      <div className="divide-y divide-border max-h-48 overflow-y-auto">
         {reviewerVotes.length === 0 && !isVoting && (
           <div className="px-4 py-6 text-center text-muted-foreground text-sm">
             No votes yet. Be the first to review!
@@ -355,17 +354,17 @@ export function ReviewerVotesSection({
         {reviewerVotes.map((vote) => (
           <div key={vote.id} className="px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-medium">
+              <div className="w-8 h-8 rounded-lg bg-purple-500 text-white flex items-center justify-center text-sm font-medium">
                 {vote.reviewerInitials}
               </div>
               <div>
-                <span className="font-medium text-sm">{vote.reviewer}</span>
+                <span className="font-medium text-sm text-foreground">{vote.reviewer}</span>
                 {vote.notes && (
                   <p className="text-xs text-muted-foreground">{vote.notes}</p>
                 )}
               </div>
             </div>
-            <Badge className="bg-purple-100 text-purple-800">
+            <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-0">
               {vote.suggestedLevel}
             </Badge>
           </div>
@@ -373,13 +372,13 @@ export function ReviewerVotesSection({
 
         {/* Add Vote Form */}
         {isVoting && (
-          <div className="px-4 py-3 bg-gray-50 space-y-3">
+          <div className="px-4 py-3 bg-secondary/30 space-y-3">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium">My suggested level:</span>
+              <span className="text-sm font-medium text-foreground">My suggested level:</span>
               <select
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(e.target.value)}
-                className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm flex-1"
+                className="h-9 rounded-lg border border-border bg-secondary/50 px-3 py-1 text-sm text-foreground flex-1 focus:ring-2 focus:ring-primary"
               >
                 <option value="">Select level...</option>
                 {levelOptions.map(level => (
@@ -391,7 +390,7 @@ export function ReviewerVotesSection({
               placeholder="Notes (optional) - Why do you suggest this level?"
               value={voteNotes}
               onChange={(e) => setVoteNotes(e.target.value)}
-              className="h-9"
+              className="h-9 bg-secondary/50 border-border"
             />
             <div className="flex gap-2 justify-end">
               <Button size="sm" variant="ghost" onClick={() => setIsVoting(false)}>

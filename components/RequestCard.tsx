@@ -16,13 +16,13 @@ const STATUS_CONFIG: Record<string, { bg: string; iconType: 'new' | 'clock' | 'e
   'Awaiting Mgmt Level': { bg: 'bg-amber-500', iconType: 'clock' },
   'Under Review': { bg: 'bg-purple-500', iconType: 'eye' },
   'Grades Pending': { bg: 'bg-orange-500', iconType: 'chart' },
-  'Ready for Workday': { bg: 'bg-green-500', iconType: 'check' },
+  'Ready for Workday': { bg: 'bg-emerald-500', iconType: 'check' },
   'In Progress': { bg: 'bg-indigo-500', iconType: 'progress' },
-  'Completed': { bg: 'bg-slate-400', iconType: 'done' },
+  'Completed': { bg: 'bg-muted-foreground', iconType: 'done' },
 };
 
 function StatusIcon({ type }: { type: string }) {
-  const iconClass = "w-5 h-5 text-white";
+  const iconClass = "w-4 h-4 text-foreground";
   switch (type) {
     case 'new':
       return (
@@ -78,98 +78,98 @@ function StatusIcon({ type }: { type: string }) {
 
 export function RequestCard({ request, onClick }: RequestCardProps) {
   const isOverdue = request.dueDate && new Date(request.dueDate) < new Date() && request.status !== 'Completed';
-  const statusConfig = STATUS_CONFIG[request.status] || { bg: 'bg-slate-500', iconType: 'new' as const };
+  const statusConfig = STATUS_CONFIG[request.status] || { bg: 'bg-muted', iconType: 'new' as const };
   
   return (
     <Card
-      className={`group cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 border-slate-200 ${
-        isOverdue ? 'border-red-300 bg-gradient-to-br from-red-50 to-white ring-1 ring-red-200' : 'bg-white hover:border-welocalize-blue/30'
-      } ${request.urgency === 'Urgent' && !isOverdue ? 'border-l-4 border-l-orange-500' : ''}`}
+      className={`group cursor-pointer transition-all duration-300 bg-card border-border hover:border-primary/30 hover:bg-secondary/30 ${
+        isOverdue ? 'border-red-500/30 bg-red-500/5' : ''
+      } ${request.urgency === 'Urgent' && !isOverdue ? 'border-l-2 border-l-orange-500' : ''}`}
       onClick={onClick}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1 min-w-0">
             {/* Status Icon */}
-            <div className={`w-10 h-10 rounded-xl ${statusConfig.bg} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+            <div className={`w-9 h-9 rounded-lg ${statusConfig.bg} flex items-center justify-center flex-shrink-0`}>
               <StatusIcon type={statusConfig.iconType} />
             </div>
             <div className="min-w-0 flex-1">
-              <CardTitle className="text-base font-semibold text-slate-900 line-clamp-1 group-hover:text-welocalize-blue transition-colors">
+              <CardTitle className="text-sm font-medium text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                 {request.title}
               </CardTitle>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge className={`${STATUS_COLORS[request.status] || 'bg-gray-100'} text-xs font-medium`}>
+              <div className="flex items-center gap-2 mt-1.5">
+                <Badge className={`${STATUS_COLORS[request.status] || 'bg-muted text-muted-foreground'} text-xs font-medium border-0`}>
                   {request.status}
                 </Badge>
                 {request.urgency === 'Urgent' && (
-                  <Badge variant="destructive" className="text-xs">
+                  <Badge variant="destructive" className="text-xs border-0">
                     Urgent
                   </Badge>
                 )}
               </div>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-welocalize-blue transition-colors flex-shrink-0" />
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-1" />
         </div>
       </CardHeader>
       <CardContent className="space-y-3 pt-0">
-        <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">{request.description}</p>
+        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{request.description}</p>
         
         {/* Meta info */}
-        <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-500">
+        <div className="flex flex-wrap gap-2 text-xs">
           {request.department && (
-            <span className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md">
-              <User className="h-3 w-3 text-slate-400" />
+            <span className="flex items-center gap-1.5 bg-secondary px-2.5 py-1 rounded-md text-muted-foreground">
+              <User className="h-3 w-3" />
               {request.department}
             </span>
           )}
           
           {request.countriesNeeded?.length > 0 && (
-            <span className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md">
-              <MapPin className="h-3 w-3 text-slate-400" />
+            <span className="flex items-center gap-1.5 bg-secondary px-2.5 py-1 rounded-md text-muted-foreground">
+              <MapPin className="h-3 w-3" />
               {request.countriesNeeded.slice(0, 2).join(', ')}
               {request.countriesNeeded.length > 2 && (
-                <span className="text-slate-400">+{request.countriesNeeded.length - 2}</span>
+                <span className="opacity-60">+{request.countriesNeeded.length - 2}</span>
               )}
             </span>
           )}
           
           {request.dueDate && (
-            <span className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${
+            <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md ${
               isOverdue 
-                ? 'bg-red-100 text-red-700 font-medium' 
-                : 'bg-slate-50 text-slate-500'
+                ? 'bg-red-500/20 text-red-400 font-medium' 
+                : 'bg-secondary text-muted-foreground'
             }`}>
-              {isOverdue ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3 text-slate-400" />}
+              {isOverdue ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
               {formatDate(request.dueDate)}
             </span>
           )}
         </div>
 
         {/* Level badges */}
-        <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+        <div className="flex items-center gap-2 pt-2 border-t border-border">
           {request.proposedMgmtLevel && request.proposedMgmtLevel !== 'I don\'t know / Let the team decide' && (
-            <span className="px-2.5 py-1 bg-slate-100 rounded-md text-xs font-semibold text-slate-700">
+            <span className="px-2.5 py-1 bg-secondary rounded-md text-xs font-medium text-foreground">
               {request.proposedMgmtLevel}
             </span>
           )}
           
           {request.aiSuggestedMgmtLevel && (
-            <span className="flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-cyan-50 to-blue-50 text-welocalize-blue rounded-md text-xs font-medium border border-cyan-100">
+            <span className="flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium border border-primary/20">
               <Sparkles className="h-3 w-3" />
               AI: {request.aiSuggestedMgmtLevel}
             </span>
           )}
           
           {request.agreedMgmtLevel && (
-            <span className="px-2.5 py-1 bg-green-100 text-green-700 rounded-md text-xs font-semibold">
-              ✓ {request.agreedMgmtLevel}
+            <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-md text-xs font-medium">
+              {request.agreedMgmtLevel}
             </span>
           )}
 
           {(request.owner || request.assignedTo) && (
-            <span className="ml-auto flex items-center gap-1 text-xs text-slate-400" title="Owner">
+            <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground" title="Owner">
               <UserCheck className="h-3 w-3" />
               {(request.owner || request.assignedTo)?.split(' ')[0]}
             </span>

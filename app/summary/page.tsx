@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { JobProfileRequest, PEOPLE_PARTNER_BY_AREA } from '@/lib/types';
+import { Users, BarChart3, Building2, Globe, Star, CheckCircle2 } from 'lucide-react';
 
 // Demo data - same as Dashboard (in production would come from a shared store/API)
 const DEMO_REQUESTS: JobProfileRequest[] = [
@@ -202,9 +203,6 @@ export default function SummaryPage() {
     const completed = requests.filter(r => r.status === 'Completed').length;
     const completionRate = Math.round((completed / requests.length) * 100);
 
-    // Average time to completion (for completed requests)
-    const completedRequests = requests.filter(r => r.status === 'Completed' && r.requestDate);
-    
     return {
       total: requests.length,
       completed,
@@ -223,87 +221,77 @@ export default function SummaryPage() {
   // Color for progress bars
   const getBarColor = (index: number) => {
     const colors = [
-      'bg-welocalize-blue',
-      'bg-cyan-500',
+      'bg-primary',
       'bg-teal-500',
       'bg-emerald-500',
       'bg-blue-500',
       'bg-indigo-500',
       'bg-violet-500',
       'bg-purple-500',
+      'bg-pink-500',
     ];
     return colors[index % colors.length];
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/" className="hover:text-welocalize-blue transition-colors">
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-primary transition-colors">
           Dashboard
         </Link>
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
-        <span className="text-slate-900 font-medium">Summary</span>
+        <span className="text-foreground font-medium">Summary</span>
       </nav>
 
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Job Profiles Summary</h1>
-        <p className="text-slate-500 mt-1">
+        <h1 className="text-2xl font-semibold text-foreground tracking-tight">Job Profiles Summary</h1>
+        <p className="text-muted-foreground text-sm mt-1">
           Analytics and insights on job profile requests
         </p>
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-welocalize-blue to-cyan-600 text-white border-0">
-          <CardContent className="pt-6">
-            <p className="text-sm font-medium text-white/80">Total Profiles</p>
-            <p className="text-4xl font-bold mt-1">{analytics.total}</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0">
-          <CardContent className="pt-6">
-            <p className="text-sm font-medium text-white/80">Completed</p>
-            <p className="text-4xl font-bold mt-1">{analytics.completed}</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-purple-500 to-violet-600 text-white border-0">
-          <CardContent className="pt-6">
-            <p className="text-sm font-medium text-white/80">Completion Rate</p>
-            <p className="text-4xl font-bold mt-1">{analytics.completionRate}%</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-amber-500 to-orange-600 text-white border-0">
-          <CardContent className="pt-6">
-            <p className="text-sm font-medium text-white/80">In Progress</p>
-            <p className="text-4xl font-bold mt-1">{analytics.total - analytics.completed}</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="stat-card">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Profiles</p>
+          <p className="text-3xl font-semibold text-primary mt-2">{analytics.total}</p>
+        </div>
+        <div className="stat-card">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Completed</p>
+          <p className="text-3xl font-semibold text-emerald-400 mt-2">{analytics.completed}</p>
+        </div>
+        <div className="stat-card">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Completion Rate</p>
+          <p className="text-3xl font-semibold text-purple-400 mt-2">{analytics.completionRate}%</p>
+        </div>
+        <div className="stat-card">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">In Progress</p>
+          <p className="text-3xl font-semibold text-amber-400 mt-2">{analytics.total - analytics.completed}</p>
+        </div>
       </div>
 
       {/* Main Analytics Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-6">
         {/* By Owner (People Partner) */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-welocalize-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+            <CardTitle className="flex items-center gap-2 text-foreground text-base font-medium">
+              <Users className="w-4 h-4 text-primary" />
               By People Partner (Owner)
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {analytics.byOwner.map(([owner, count], idx) => (
-              <div key={owner} className="space-y-1">
+              <div key={owner} className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="font-medium text-slate-700">{owner}</span>
-                  <span className="text-slate-500">{count} profiles</span>
+                  <span className="font-medium text-foreground">{owner}</span>
+                  <span className="text-muted-foreground">{count} profiles</span>
                 </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div 
                     className={`h-full ${getBarColor(idx)} rounded-full transition-all`}
                     style={{ width: `${(count / analytics.total) * 100}%` }}
@@ -315,23 +303,21 @@ export default function SummaryPage() {
         </Card>
 
         {/* By Level Category */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-welocalize-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+            <CardTitle className="flex items-center gap-2 text-foreground text-base font-medium">
+              <BarChart3 className="w-4 h-4 text-primary" />
               By Management Level Category
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {analytics.byLevelCategory.map(([category, count], idx) => (
-              <div key={category} className="space-y-1">
+              <div key={category} className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="font-medium text-slate-700">{category}</span>
-                  <span className="text-slate-500">{count} profiles</span>
+                  <span className="font-medium text-foreground">{category}</span>
+                  <span className="text-muted-foreground">{count} profiles</span>
                 </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div 
                     className={`h-full ${getBarColor(idx)} rounded-full transition-all`}
                     style={{ width: `${(count / analytics.total) * 100}%` }}
@@ -343,12 +329,10 @@ export default function SummaryPage() {
         </Card>
 
         {/* By Specific Level */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-welocalize-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-              </svg>
+            <CardTitle className="flex items-center gap-2 text-foreground text-base font-medium">
+              <BarChart3 className="w-4 h-4 text-primary" />
               By Specific Level
             </CardTitle>
           </CardHeader>
@@ -358,10 +342,10 @@ export default function SummaryPage() {
                 <Badge 
                   key={level} 
                   variant="secondary" 
-                  className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200"
+                  className="px-3 py-1.5 text-sm bg-secondary border-0"
                 >
-                  <span className="font-semibold text-welocalize-blue">{level}</span>
-                  <span className="ml-2 text-slate-500">{count}</span>
+                  <span className="font-medium text-primary">{level}</span>
+                  <span className="ml-2 text-muted-foreground">{count}</span>
                 </Badge>
               ))}
             </div>
@@ -369,23 +353,21 @@ export default function SummaryPage() {
         </Card>
 
         {/* By Department */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-welocalize-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+            <CardTitle className="flex items-center gap-2 text-foreground text-base font-medium">
+              <Building2 className="w-4 h-4 text-primary" />
               By Department
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {analytics.byDepartment.map(([dept, count], idx) => (
-              <div key={dept} className="space-y-1">
+              <div key={dept} className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="font-medium text-slate-700">{dept}</span>
-                  <span className="text-slate-500">{count} profiles</span>
+                  <span className="font-medium text-foreground">{dept}</span>
+                  <span className="text-muted-foreground">{count} profiles</span>
                 </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div 
                     className={`h-full ${getBarColor(idx)} rounded-full transition-all`}
                     style={{ width: `${(count / analytics.total) * 100}%` }}
@@ -397,24 +379,22 @@ export default function SummaryPage() {
         </Card>
 
         {/* Grade Ranges by Country */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-welocalize-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <CardTitle className="flex items-center gap-2 text-foreground text-base font-medium">
+              <Globe className="w-4 h-4 text-primary" />
               Grade Ranges by Country
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {analytics.gradesByCountry.length > 0 ? (
               analytics.gradesByCountry.map(([country, count], idx) => (
-                <div key={country} className="space-y-1">
+                <div key={country} className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="font-medium text-slate-700">{country}</span>
-                    <span className="text-slate-500">{count} grades added</span>
+                    <span className="font-medium text-foreground">{country}</span>
+                    <span className="text-muted-foreground">{count} grades added</span>
                   </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                     <div 
                       className={`h-full ${getBarColor(idx)} rounded-full transition-all`}
                       style={{ width: `${(count / Math.max(...analytics.gradesByCountry.map(g => g[1]))) * 100}%` }}
@@ -423,18 +403,16 @@ export default function SummaryPage() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-500">No grade ranges added yet</p>
+              <p className="text-sm text-muted-foreground">No grade ranges added yet</p>
             )}
           </CardContent>
         </Card>
 
         {/* Top Contributors (Grade Ranges) */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-welocalize-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-              </svg>
+            <CardTitle className="flex items-center gap-2 text-foreground text-base font-medium">
+              <Star className="w-4 h-4 text-primary" />
               Top Contributors (Grades Added)
             </CardTitle>
           </CardHeader>
@@ -443,49 +421,47 @@ export default function SummaryPage() {
               analytics.gradesByPerson.slice(0, 5).map(([person, count], idx) => (
                 <div key={person} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full ${getBarColor(idx)} flex items-center justify-center text-white text-sm font-medium`}>
+                    <div className={`w-7 h-7 rounded-lg ${getBarColor(idx)} flex items-center justify-center text-foreground text-xs font-medium`}>
                       {idx + 1}
                     </div>
-                    <span className="font-medium text-slate-700">{person}</span>
+                    <span className="font-medium text-foreground text-sm">{person}</span>
                   </div>
-                  <Badge variant="secondary">{count} grades</Badge>
+                  <Badge variant="secondary" className="border-0">{count} grades</Badge>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-500">No grades added yet</p>
+              <p className="text-sm text-muted-foreground">No grades added yet</p>
             )}
           </CardContent>
         </Card>
 
         {/* By Status */}
-        <Card className="md:col-span-2">
+        <Card className="lg:col-span-2 bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-welocalize-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
+            <CardTitle className="flex items-center gap-2 text-foreground text-base font-medium">
+              <CheckCircle2 className="w-4 h-4 text-primary" />
               Status Distribution
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {analytics.byStatus.map(([status, count]) => {
                 const statusColors: Record<string, string> = {
-                  'New': 'bg-blue-100 text-blue-800 border-blue-200',
-                  'Awaiting Mgmt Level': 'bg-amber-100 text-amber-800 border-amber-200',
-                  'Under Review': 'bg-purple-100 text-purple-800 border-purple-200',
-                  'Grades Pending': 'bg-orange-100 text-orange-800 border-orange-200',
-                  'Ready for Workday': 'bg-green-100 text-green-800 border-green-200',
-                  'In Progress': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-                  'Completed': 'bg-slate-100 text-slate-800 border-slate-200',
+                  'New': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                  'Awaiting Mgmt Level': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                  'Under Review': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+                  'Grades Pending': 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+                  'Ready for Workday': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                  'In Progress': 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+                  'Completed': 'bg-muted text-muted-foreground border-border',
                 };
                 return (
                   <div 
                     key={status} 
-                    className={`p-4 rounded-xl border ${statusColors[status] || 'bg-slate-100 border-slate-200'}`}
+                    className={`p-4 rounded-xl border ${statusColors[status] || 'bg-muted border-border'}`}
                   >
-                    <p className="text-2xl font-bold">{count}</p>
-                    <p className="text-sm font-medium mt-1">{status}</p>
+                    <p className="text-2xl font-semibold">{count}</p>
+                    <p className="text-xs font-medium mt-1 opacity-80">{status}</p>
                   </div>
                 );
               })}

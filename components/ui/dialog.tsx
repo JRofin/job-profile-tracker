@@ -28,7 +28,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     <div className="fixed inset-0 z-50">
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 animate-in fade-in-0"
+        className="fixed inset-0 bg-background/80 backdrop-blur-sm animate-in fade-in-0"
         onClick={() => onOpenChange(false)}
       />
       {/* Content */}
@@ -47,7 +47,7 @@ export function DialogContent({ children, className, onClose }: DialogContentPro
   return (
     <div
       className={cn(
-        'fixed right-0 top-0 h-full w-full max-w-2xl bg-white shadow-xl',
+        'fixed right-0 top-0 h-full w-full max-w-2xl bg-card border-l border-border shadow-xl',
         'animate-in slide-in-from-right-full duration-300',
         'overflow-y-auto',
         className
@@ -56,7 +56,7 @@ export function DialogContent({ children, className, onClose }: DialogContentPro
       {onClose && (
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
+          className="absolute right-4 top-4 p-2 rounded-lg hover:bg-secondary transition-colors z-10 text-muted-foreground hover:text-foreground"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
@@ -74,7 +74,7 @@ interface DialogHeaderProps {
 
 export function DialogHeader({ children, className }: DialogHeaderProps) {
   return (
-    <div className={cn('sticky top-0 bg-white border-b px-6 py-4 z-10', className)}>
+    <div className={cn('sticky top-0 bg-card/95 backdrop-blur-sm border-b border-border px-6 py-4 z-10', className)}>
       {children}
     </div>
   );
@@ -87,7 +87,7 @@ interface DialogTitleProps {
 
 export function DialogTitle({ children, className }: DialogTitleProps) {
   return (
-    <h2 className={cn('text-xl font-semibold', className)}>
+    <h2 className={cn('text-lg font-semibold text-foreground', className)}>
       {children}
     </h2>
   );
